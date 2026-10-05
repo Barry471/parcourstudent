@@ -50,7 +50,9 @@ export type Visit = {
 const dir = path.join(process.cwd(), "data");
 fs.mkdirSync(dir, { recursive: true });
 
-const db = new DatabaseSync(path.join(dir, "parcours.db"));
+const db = new DatabaseSync(path.join(dir, "parcours.db"), { timeout: 10000 });
+db.exec("PRAGMA journal_mode = WAL");
+db.exec("PRAGMA busy_timeout = 10000");
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
