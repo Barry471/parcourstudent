@@ -103,24 +103,22 @@ db.exec(`
   );
 `);
 
+function addColumn(table: string, column: string, definition: string) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (columns.some((item) => item.name === column)) return;
+  try {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (!message.includes("duplicate column name")) throw error;
+  }
+}
+
 for (const column of ["city", "school", "titre_expires_on", "arrived_on", "reminder_sent_on", "situation", "year_level", "country", "password_help_at"]) {
-  const columns = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
-  if (!columns.some((item) => item.name === column)) {
-    db.exec(`ALTER TABLE users ADD COLUMN ${column} TEXT`);
-  }
+  addColumn("users", column, "TEXT");
 }
-{
-  const columns = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
-  if (!columns.some((item) => item.name === "active")) {
-    db.exec("ALTER TABLE users ADD COLUMN active INTEGER NOT NULL DEFAULT 1");
-  }
-}
-{
-  const columns = db.prepare("PRAGMA table_info(city_groups)").all() as { name: string }[];
-  if (!columns.some((item) => item.name === "audience")) {
-    db.exec("ALTER TABLE city_groups ADD COLUMN audience TEXT NOT NULL DEFAULT 'ville'");
-  }
-}
+addColumn("users", "active", "INTEGER NOT NULL DEFAULT 1");
+addColumn("city_groups", "audience", "TEXT NOT NULL DEFAULT 'ville'");
 db.exec(`
   CREATE TABLE IF NOT EXISTS password_resets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -356,12 +354,7 @@ export function deleteGroup(id: number) {
   db.prepare("DELETE FROM city_groups WHERE id = ?").run(id);
 }
 
-{
-  const columns = db.prepare("PRAGMA table_info(partner_links)").all() as { name: string }[];
-  if (!columns.some((item) => item.name === "affiliate")) {
-    db.exec("ALTER TABLE partner_links ADD COLUMN affiliate INTEGER NOT NULL DEFAULT 0");
-  }
-}
+addColumn("partner_links", "affiliate", "INTEGER NOT NULL DEFAULT 0");
 
 export function linksForCategory(category: string) {
   return db
