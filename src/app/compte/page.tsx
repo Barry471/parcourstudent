@@ -14,7 +14,7 @@ export default async function AccountPage({
       <h1 className="mt-2 font-serif text-4xl">Changer le mot de passe</h1>
       <p className="mt-3 text-muted">{user.email}</p>
       {etat === "ok" && <p className="mt-4 text-sm text-blue">Le mot de passe est changé.</p>}
-      {erreur && <p className="mt-4 text-sm text-amber">Le mot de passe actuel ne correspond pas, ou le nouveau est trop court.</p>}
+      {erreur && <p className="mt-4 text-sm text-amber">Le mot de passe actuel ne correspond pas, ou le nouveau doit faire 12 caractères avec une lettre et un chiffre.</p>}
       <form action={changePasswordAction} className="mt-6 grid gap-3">
         <label className="grid gap-1 text-sm">
           Mot de passe actuel
@@ -22,7 +22,7 @@ export default async function AccountPage({
         </label>
         <label className="grid gap-1 text-sm">
           Nouveau mot de passe
-          <input name="password" type="password" required minLength={8} maxLength={72} autoComplete="new-password" className="rounded-2xl border border-line bg-card px-4 py-3" />
+          <input name="password" type="password" required minLength={12} maxLength={72} autoComplete="new-password" placeholder="12 caractères, avec un chiffre" className="rounded-2xl border border-line bg-card px-4 py-3" />
         </label>
         <button className="rounded-full bg-blue px-5 py-3 text-paper" type="submit">Enregistrer</button>
       </form>

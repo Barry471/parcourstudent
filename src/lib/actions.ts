@@ -33,6 +33,8 @@ import {
   deleteVideo,
   clearLoginFailures,
   recentLoginFailures,
+  recentLoginTotal,
+  recentUserCount,
   recordLoginFailure,
   createUser,
   deleteGroup,
@@ -55,7 +57,7 @@ import {
   updateProfile,
 } from "@/lib/db";
 import { clearSession, setSession } from "@/lib/auth";
-import { cleanEmail, cleanText, passwordOk, safeNext, validEmail } from "@/lib/input";
+import { cleanEmail, cleanText, newPasswordOk, passwordOk, safeNext, validEmail } from "@/lib/input";
 import { removeInfoFile, saveInfoFile, sniffInfo } from "@/lib/infoFiles";
 import { broadcastChat } from "@/lib/live";
 import { canSendMail, sendPasswordLink } from "@/lib/mail";
@@ -93,9 +95,11 @@ export async function registerAction(formData: FormData) {
   const school = cleanText(formData.get("school"), 120) || undecidedSchool;
   const country = String(formData.get("country") ?? "");
   const knownCountry = countries.some((item) => item.id === country);
-  if (name.length < 2 || !validEmail(email) || !passwordOk(password) || !acceptedCity(city) || !knownCountry) {
+  if (name.length < 2 || !validEmail(email) || !newPasswordOk(password) || !acceptedCity(city) || !knownCountry) {
     redirect("/inscription?erreur=incomplet");
   }
+  const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  if (recentUserCount(since) >= 40) redirect("/inscription?erreur=attente");
   if (findUserByEmail(email)) redirect("/inscription?erreur=existe");
   const user = createUser(name, email, hashPassword(password), city, school, country);
   await setSession(user.id);
@@ -237,7 +241,7 @@ export async function loginAction(formData: FormData) {
     redirect(`/connexion?erreur=identifiants&next=${encodeURIComponent(nextPath)}`);
   }
   const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-  if (recentLoginFailures(email, since) >= 8) {
+  if (recentLoginFailures(email, since) >= 8 || recentLoginTotal(since) >= 60) {
     redirect(`/connexion?erreur=attente&next=${encodeURIComponent(nextPath)}`);
   }
   const user = findUserByEmail(email);
@@ -265,7 +269,7 @@ export async function addStudentAction(formData: FormData) {
   const country = String(formData.get("country") ?? "");
   const school = cleanText(formData.get("school"), 120) || undecidedSchool;
   const back = studentsPath(formData);
-  if (name.length < 2 || !validEmail(email) || !passwordOk(password) || !acceptedCity(city) || !countries.some((item) => item.id === country)) {
+  if (name.length < 2 || !validEmail(email) || !newPasswordOk(password) || !acceptedCity(city) || !countries.some((item) => item.id === country)) {
     redirect(`${back}${back.includes("?") ? "&" : "?"}erreur=1`);
   }
   if (findUserByEmail(email)) redirect(`${back}${back.includes("?") ? "&" : "?"}erreur=existe`);
@@ -283,7 +287,7 @@ export async function resetPasswordAction(formData: FormData) {
   await requireAdmin();
   const password = String(formData.get("password") ?? "");
   const back = studentsPath(formData);
-  if (password.length < 8) redirect(`${back}${back.includes("?") ? "&" : "?"}erreur=mdp`);
+  if (!newPasswordOk(password)) redirect(`${back}${back.includes("?") ? "&" : "?"}erreur=mdp`);
   setUserPassword(Number(formData.get("id")), hashPassword(password));
   redirect(studentsPath(formData));
 }
@@ -425,7 +429,8 @@ export async function forgotPasswordAction(formData: FormData) {
 export async function choosePasswordAction(formData: FormData) {
   const token = String(formData.get("jeton") ?? "");
   const password = String(formData.get("password") ?? "");
-  if (!/^[a-f0-9]{64}$/.test(token) || !passwordOk(password)) redirect("/mot-de-passe?erreur=lien");
+  if (!/^[a-f0-9]{64}$/.test(token)) redirect("/mot-de-passe?erreur=lien");
+  if (!newPasswordOk(password)) redirect(`/mot-de-passe?erreur=mdp&jeton=${token}`);
   const tokenHash = createHash("sha256").update(token).digest("hex");
   const userId = takeResetToken(tokenHash, new Date().toISOString());
   const user = userId ? findUserById(userId) : null;
@@ -443,7 +448,7 @@ export async function changePasswordAction(formData: FormData) {
   const current = String(formData.get("current") ?? "").slice(0, 72);
   const password = String(formData.get("password") ?? "");
   const stored = findUserByEmail(user.email);
-  if (!stored || !passwordOk(password) || !verifyPassword(current, stored.password_hash)) {
+  if (!stored || !newPasswordOk(password) || !verifyPassword(current, stored.password_hash)) {
     redirect("/compte?erreur=1");
   }
   updateOwnPassword(user.id, hashPassword(password));
@@ -484,8 +489,8 @@ export async function saveAccompagnateurAction(formData: FormData) {
   const current = findAccompagnateur();
   const taken = findUserByEmail(email);
   if (!validEmail(email) || (taken && taken.role !== "accompagnateur")) redirect("/admin?erreur=accompagnement");
-  if (!current && !passwordOk(password)) redirect("/admin?erreur=accompagnement");
-  if (password && !passwordOk(password)) redirect("/admin?erreur=accompagnement");
+  if (!current && !newPasswordOk(password)) redirect("/admin?erreur=accompagnement");
+  if (password && !newPasswordOk(password)) redirect("/admin?erreur=accompagnement");
   saveAccompagnateurAccount(email, password ? hashPassword(password) : null);
   redirect("/admin?etat=accompagnement");
 }

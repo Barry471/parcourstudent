@@ -3,7 +3,8 @@ import { registerAction } from "@/lib/actions";
 import { cities, countries, undecidedCity } from "@/lib/content";
 
 const messages: Record<string, string> = {
-  incomplet: "Vérifie chaque champ : le mot de passe fait au moins 8 caractères, et l'e-mail est complet.",
+  incomplet: "Vérifie chaque champ : le mot de passe fait au moins 12 caractères, avec une lettre et un chiffre, et l'e-mail est complet.",
+  attente: "Trop de comptes viennent d'être créés. Réessaie dans un moment.",
   existe: "Cette adresse e-mail a déjà un compte. Connecte-toi.",
 };
 
@@ -37,7 +38,7 @@ export default async function RegisterPage({
           </label>
           <label className="grid gap-1 text-sm">
             Mot de passe
-            <input name="password" type="password" required minLength={8} maxLength={72} autoComplete="new-password" placeholder="8 caractères minimum" className={field} />
+            <input name="password" type="password" required minLength={12} maxLength={72} autoComplete="new-password" placeholder="12 caractères, avec un chiffre" className={field} />
           </label>
         </fieldset>
         <fieldset className="grid gap-3">

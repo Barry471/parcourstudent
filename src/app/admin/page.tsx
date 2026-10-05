@@ -49,7 +49,7 @@ export default async function AdminPage({
         <h2 className="font-serif text-2xl">Compte accompagnement</h2>
         <p className="mt-2 text-sm text-muted">Ibrahim Talibe DIALLO ne voit que les personnes qui ont écrit pour un accompagnement.</p>
         {etat === "accompagnement" && <p className="mt-3 text-sm text-blue">Le compte est enregistré.</p>}
-        {erreur === "accompagnement" && <p className="mt-3 text-sm text-amber">L&apos;adresse est déjà prise, ou le mot de passe est trop court.</p>}
+        {erreur === "accompagnement" && <p className="mt-3 text-sm text-amber">L&apos;adresse est déjà prise, ou le mot de passe doit faire 12 caractères avec une lettre et un chiffre.</p>}
         <form action={saveAccompagnateurAction} className="mt-4 grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1 text-sm">
             Adresse e-mail
@@ -57,7 +57,7 @@ export default async function AdminPage({
           </label>
           <label className="grid gap-1 text-sm">
             Mot de passe {accompagnateur ? "(laisser vide pour le garder)" : ""}
-            <input name="password" type="password" autoComplete="new-password" minLength={accompagnateur ? undefined : 8} required={!accompagnateur} className="rounded-2xl border border-line bg-paper px-4 py-3" />
+            <input name="password" type="password" autoComplete="new-password" minLength={accompagnateur ? undefined : 12} required={!accompagnateur} placeholder="12 caractères, avec un chiffre" className="rounded-2xl border border-line bg-paper px-4 py-3" />
           </label>
           <button className="rounded-full bg-blue px-5 py-3 text-sm text-paper sm:col-span-2 sm:w-fit" type="submit">
             {accompagnateur ? "Mettre à jour le compte" : "Créer le compte"}

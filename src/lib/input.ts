@@ -26,3 +26,7 @@ export function safeNext(value: FormDataEntryValue | null) {
 export function passwordOk(password: string) {
   return password.length >= 8 && password.length <= 72;
 }
+
+export function newPasswordOk(password: string) {
+  return password.length >= 12 && password.length <= 72 && /[A-Za-z]/.test(password) && /\d/.test(password);
+}

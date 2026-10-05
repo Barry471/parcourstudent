@@ -15,10 +15,11 @@ export default async function PasswordPage({
         <form action={choosePasswordAction} className="mt-6 grid gap-3">
           <input type="hidden" name="jeton" value={token} />
           <p className="text-sm text-muted">Le lien ne sert qu&apos;une fois. Ensuite tu es connecté.</p>
-          {erreur && <p className="text-sm text-amber">Ce lien n&apos;est plus valable. Demande-en un autre.</p>}
+          {erreur === "lien" && <p className="text-sm text-amber">Ce lien n&apos;est plus valable. Demande-en un autre.</p>}
+          {erreur === "mdp" && <p className="text-sm text-amber">Le mot de passe doit faire 12 caractères, avec une lettre et un chiffre.</p>}
           <label className="grid gap-1 text-sm">
             Nouveau mot de passe
-            <input name="password" type="password" required minLength={8} maxLength={72} autoComplete="new-password" className="rounded-2xl border border-line bg-card px-4 py-3" />
+            <input name="password" type="password" required minLength={12} maxLength={72} autoComplete="new-password" placeholder="12 caractères, avec un chiffre" className="rounded-2xl border border-line bg-card px-4 py-3" />
           </label>
           <button className="rounded-full bg-blue px-5 py-3 text-paper" type="submit">Enregistrer</button>
         </form>

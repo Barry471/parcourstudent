@@ -57,7 +57,7 @@ export default async function StudentsPage({
       <form action={addStudentAction} className="mt-4 grid gap-3 sm:grid-cols-2">
         <input name="name" required placeholder="Nom" className="rounded-2xl border border-line px-3 py-2" />
         <input name="email" type="email" required placeholder="E-mail" className="rounded-2xl border border-line px-3 py-2" />
-        <input name="password" type="text" required minLength={8} placeholder="Mot de passe temporaire" className="rounded-2xl border border-line px-3 py-2" />
+        <input name="password" type="text" required minLength={12} placeholder="12 caractères, avec un chiffre" className="rounded-2xl border border-line px-3 py-2" />
         <input name="school" placeholder="École" className="rounded-2xl border border-line px-3 py-2" />
         <select name="country" required className="rounded-2xl border border-line px-3 py-2" defaultValue="guinee">
           {countries.map((country) => <option key={country.id} value={country.id}>{country.name}</option>)}
@@ -92,7 +92,7 @@ export default async function StudentsPage({
                     <input type="hidden" name="filtre_pays" value={countryId} />
                     <input type="hidden" name="filtre_ville" value={cityId} />
                     <input type="hidden" name="id" value={person.id} />
-                    <input name="password" required minLength={8} placeholder="Nouveau mot de passe" className="rounded-xl border border-line px-2 py-1" />
+                    <input name="password" required minLength={12} placeholder="12 caractères, avec un chiffre" className="rounded-xl border border-line px-2 py-1" />
                     <button className="text-blue" type="submit">Changer</button>
                   </form>
                   <form action={deleteStudentAction}>

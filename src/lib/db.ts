@@ -227,6 +227,20 @@ export function recentLoginFailures(email: string, sinceIso: string) {
   return row.count;
 }
 
+export function recentLoginTotal(sinceIso: string) {
+  const row = db
+    .prepare("SELECT COUNT(*) AS count FROM login_attempts WHERE created_at >= ?")
+    .get(sinceIso) as { count: number };
+  return row.count;
+}
+
+export function recentUserCount(sinceIso: string) {
+  const row = db
+    .prepare("SELECT COUNT(*) AS count FROM users WHERE role = 'user' AND created_at >= ?")
+    .get(sinceIso) as { count: number };
+  return row.count;
+}
+
 export function recordLoginFailure(email: string) {
   db.prepare("INSERT INTO login_attempts (email, created_at) VALUES (?, ?)").run(email, new Date().toISOString());
 }
