@@ -164,6 +164,11 @@ async function requireAdmin() {
   if (!user || user.role !== "admin") redirect("/");
 }
 
+async function requireStaff() {
+  const user = await currentUser();
+  if (!user || (user.role !== "admin" && user.role !== "accompagnateur")) redirect("/");
+}
+
 export async function addGroupAction(formData: FormData) {
   await requireAdmin();
   const audience = String(formData.get("audience") ?? "ville");
@@ -255,13 +260,12 @@ export async function loginAction(formData: FormData) {
   }
   clearLoginFailures(email);
   await setSession(user.id);
-  if (user.role === "accompagnateur") redirect("/accompagnement");
-  if (user.role === "admin" && (nextPath === "/parcours" || nextPath === "/commencer")) redirect("/admin");
+  if (user.role === "accompagnateur" || (user.role === "admin" && (nextPath === "/parcours" || nextPath === "/commencer"))) redirect("/admin");
   redirect(nextPath);
 }
 
 export async function addStudentAction(formData: FormData) {
-  await requireAdmin();
+  await requireStaff();
   const name = cleanText(formData.get("name"), 80);
   const email = cleanEmail(formData.get("email"));
   const password = String(formData.get("password") ?? "");
@@ -278,13 +282,13 @@ export async function addStudentAction(formData: FormData) {
 }
 
 export async function setActiveAction(formData: FormData) {
-  await requireAdmin();
+  await requireStaff();
   setUserActive(Number(formData.get("id")), Number(formData.get("active")) === 1 ? 1 : 0);
   redirect(studentsPath(formData));
 }
 
 export async function resetPasswordAction(formData: FormData) {
-  await requireAdmin();
+  await requireStaff();
   const password = String(formData.get("password") ?? "");
   const back = studentsPath(formData);
   if (!newPasswordOk(password)) redirect(`${back}${back.includes("?") ? "&" : "?"}erreur=mdp`);
@@ -293,13 +297,13 @@ export async function resetPasswordAction(formData: FormData) {
 }
 
 export async function deleteStudentAction(formData: FormData) {
-  await requireAdmin();
+  await requireStaff();
   deleteStudent(Number(formData.get("id")));
   redirect(studentsPath(formData));
 }
 
 export async function sendAlertAction(formData: FormData) {
-  await requireAdmin();
+  await requireStaff();
   const title = cleanText(formData.get("title"), 120);
   const body = cleanText(formData.get("body"), 1000);
   const country = String(formData.get("country") ?? "");
@@ -310,7 +314,7 @@ export async function sendAlertAction(formData: FormData) {
 }
 
 export async function deleteAlertAction(formData: FormData) {
-  await requireAdmin();
+  await requireStaff();
   const id = Number(formData.get("id"));
   if (Number.isInteger(id) && id > 0) deleteAlert(id);
   redirect("/admin/alertes");
@@ -357,7 +361,8 @@ export async function deleteCommentAction(formData: FormData) {
   if (!user || user.active === 0) redirect("/connexion");
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id) || id <= 0) redirect("/messages");
-  if (user.role === "admin") deleteComment(id);
+  const staff = user.role === "admin" || user.role === "accompagnateur";
+  if (staff) deleteComment(id);
   else deleteOwnComment(id, user.id);
   broadcastChat();
   redirect("/messages");
@@ -367,15 +372,16 @@ export async function deleteMessageAction(formData: FormData) {
   const user = await currentUser();
   if (!user || user.active === 0) redirect("/connexion");
   const id = Number(formData.get("id"));
-  if (!Number.isInteger(id) || id <= 0) redirect(user.role === "admin" ? "/admin/messages" : "/messages");
-  if (user.role === "admin") deleteMessage(id);
+  const staff = user.role === "admin" || user.role === "accompagnateur";
+  if (!Number.isInteger(id) || id <= 0) redirect(staff ? "/admin/messages" : "/messages");
+  if (staff) deleteMessage(id);
   else deleteOwnMessage(id, user.id);
   broadcastChat();
-  redirect(user.role === "admin" ? "/admin/messages" : "/messages");
+  redirect(staff ? "/admin/messages" : "/messages");
 }
 
 export async function publishInfoAction(formData: FormData) {
-  await requireAdmin();
+  await requireStaff();
   const title = cleanText(formData.get("title"), 120);
   const note = cleanText(formData.get("note"), 400);
   const file = formData.get("file");
@@ -397,7 +403,7 @@ export async function publishInfoAction(formData: FormData) {
 }
 
 export async function deleteInfoAction(formData: FormData) {
-  await requireAdmin();
+  await requireStaff();
   const id = Number(formData.get("id"));
   if (Number.isInteger(id) && id > 0) {
     deleteInfo(id);
@@ -438,8 +444,8 @@ export async function choosePasswordAction(formData: FormData) {
   updateOwnPassword(user.id, hashPassword(password));
   clearLoginFailures(user.email);
   await setSession(user.id);
-  if (user.role === "accompagnateur") redirect("/accompagnement");
-  redirect(user.role === "admin" ? "/admin" : "/parcours");
+  if (user.role === "accompagnateur" || user.role === "admin") redirect("/admin");
+  redirect("/parcours");
 }
 
 export async function changePasswordAction(formData: FormData) {
@@ -479,7 +485,7 @@ export async function deleteContactAction(formData: FormData) {
   if (!user || (user.role !== "admin" && user.role !== "accompagnateur")) redirect("/");
   const id = Number(formData.get("id"));
   if (Number.isInteger(id) && id > 0) deleteContactMessage(id);
-  redirect(user.role === "accompagnateur" ? "/accompagnement" : "/admin/contact");
+  redirect("/admin/contact");
 }
 
 export async function saveAccompagnateurAction(formData: FormData) {

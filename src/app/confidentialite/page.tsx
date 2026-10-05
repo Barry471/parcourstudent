@@ -12,7 +12,7 @@ const kept = [
   "L'e-mail d'un essai de connexion raté, le temps de freiner les répétitions. Il est effacé quand cette adresse se connecte.",
   "Le lien de mot de passe oublié, sous forme chiffrée, pendant une heure.",
   "Les messages que tu écris aux autres étudiants, avec ton nom, jusqu'à ce que le message soit retiré.",
-  "Le formulaire de contact : ton nom, ton e-mail, ton numéro si tu le donnes, et ton message. Thierno BARRY et Ibrahim Talibe DIALLO le voient. Ibrahim Talibe DIALLO ne voit que ces messages.",
+  "Le formulaire de contact : ton nom, ton e-mail, ton numéro si tu le donnes, et ton message. Thierno BARRY et Ibrahima Talibé DIALLO le voient.",
   "Les images et les PDF publiés par l'administration pour informer. Tu ne peux pas en envoyer.",
 ];
 
@@ -22,7 +22,7 @@ export default function ConfidentialitePage() {
       <p className="text-sm uppercase tracking-[0.16em] text-blue">Tes informations</p>
       <h1 className="mt-2 font-serif text-4xl">Politique de confidentialité</h1>
       <p className="mt-3 text-muted">
-        Parcourstudent en France est tenu par Thierno BARRY. Ibrahim Talibe DIALLO l&apos;aide pour l&apos;accompagnement personnalisé. Le compte sert à ouvrir le guide et à t&apos;y reconnecter. Aucun dossier de candidature ou de visa n&apos;est déposé ici, et tes informations ne sont pas vendues.
+        Parcourstudent en France est tenu par Thierno BARRY et Ibrahima Talibé DIALLO. Le compte sert à ouvrir le guide et à t&apos;y reconnecter. Aucun dossier de candidature ou de visa n&apos;est déposé ici, et tes informations ne sont pas vendues.
       </p>
       <section className="mt-8">
         <h2 className="font-serif text-2xl">Ce qui est gardé</h2>
@@ -35,7 +35,7 @@ export default function ConfidentialitePage() {
       <section className="mt-8">
         <h2 className="font-serif text-2xl">Qui peut le voir</h2>
         <p className="mt-3 text-sm leading-6 text-muted">
-          Thierno BARRY voit l&apos;administration du site. {accompagnateurName} aide pour l&apos;accompagnement personnalisé : il voit seulement le nom, l&apos;e-mail, le numéro et le message envoyés par le formulaire de contact. Il ne voit pas le reste des comptes. Les autres étudiants voient ton nom et tes messages. Ces informations ne sont pas envoyées à Campus France, à France-Visas, ni à une école.
+          Thierno BARRY et {accompagnateurName} tiennent le groupe. Ils voient l&apos;administration du site. {accompagnateurName} ne gère pas les groupes, les liens ni les vidéos. Les autres étudiants voient ton nom et tes messages. Ces informations ne sont pas envoyées à Campus France, à France-Visas, ni à une école.
         </p>
       </section>
       <section className="mt-8">

@@ -1,8 +1,8 @@
-import { headers } from "next/headers";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { PhoneNav } from "@/components/PhoneNav";
-import { accompagnateurPhone, accompagnateurPhoneText, accompagnateurWhatsApp } from "@/lib/accompagnement";
+import { ChatBanner, ChatRow } from "@/components/RouteChrome";
+import { accompagnateurName, accompagnateurPhone, accompagnateurPhoneText, accompagnateurWhatsApp } from "@/lib/accompagnement";
 import { currentUser } from "@/lib/auth";
 import { candidatures } from "@/lib/candidatures";
 import { linksForCategory } from "@/lib/db";
@@ -16,9 +16,9 @@ export async function Header() {
   const inFrance = user?.role === "user" && phaseOf(user.situation) === "france";
   const alert = inFrance ? renewalAlert(user.titre_expires_on) : null;
   const showAlert = alert && alert.level !== "calm" && alert.level !== "missing";
-  const chat = (await headers()).get("x-pathname") === "/messages";
   const mail = process.env.NODE_ENV !== "production";
-  const plus = user?.role === "admin" ? adminPlus(mail) : user?.role === "user" ? studentPlus(Boolean(inFrance)) : user ? [] : guestPlus;
+  const staff = user?.role === "admin" || user?.role === "accompagnateur";
+  const plus = staff ? adminPlus(mail, user?.role === "admin") : user?.role === "user" ? studentPlus(Boolean(inFrance)) : guestPlus;
   const voieItems = candidatures.map((item) => ({ href: `/candidatures/${item.id}`, label: item.menu }));
   const demarcheItems = demarches
     .filter((item) => item.forSituations.includes(user?.situation ?? ""))
@@ -31,13 +31,8 @@ export async function Header() {
           {alert.title}. Ouvre le rappel de renouvellement.
         </Link>
       )}
-      {chat && user && (
-        <div className="bg-blue-deep px-4 py-3 text-paper md:hidden">
-          <p className="text-[11px] uppercase tracking-[0.16em] text-paper/70">Messages</p>
-          <p className="font-medium">Groupe des étudiants</p>
-        </div>
-      )}
-      <div className={`mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 md:px-5 md:py-4 ${chat && user ? "hidden md:flex" : ""}`}>
+      <ChatBanner />
+      <ChatRow>
         <Logo />
         <nav className="hidden flex-wrap items-center justify-end gap-x-4 gap-y-1 text-sm md:flex">
           {user?.role === "user" && (
@@ -75,11 +70,8 @@ export async function Header() {
               </details>
             </>
           )}
-          {user?.role === "admin" && (
+          {(user?.role === "admin" || user?.role === "accompagnateur") && (
             <Link href="/admin" className="hover:text-blue">Administration</Link>
-          )}
-          {user?.role === "accompagnateur" && (
-            <Link href="/accompagnement" className="hover:text-blue">Accompagnement</Link>
           )}
           {user ? (
             <a href="/sortir" className="text-muted hover:text-blue">Sortir</a>
@@ -98,11 +90,11 @@ export async function Header() {
             </>
           )}
         </nav>
-      </div>
+      </ChatRow>
     </header>
     <PhoneNav
       key={user ? String(user.id) : "invite"}
-      mode={user?.role === "admin" ? "admin" : user?.role === "accompagnateur" ? "accompagnateur" : user ? "student" : "guest"}
+      mode={staff ? "admin" : user ? "student" : "guest"}
       inFrance={Boolean(inFrance)}
       voies={voieItems}
       demarches={demarcheItems}
@@ -119,7 +111,7 @@ export function Footer() {
       <div className="mx-auto max-w-5xl px-5 py-8 text-sm text-muted">
         <p>Parcourstudent en France explique et oriente. Aucun document n&apos;est déposé ici. Les démarches se font sur les sites officiels.</p>
         <p className="mt-3">
-          Accompagnement personnalisé, Ibrahim Talibe DIALLO :{" "}
+          Accompagnement personnalisé, {accompagnateurName} :{" "}
           <a className="text-blue" href={`tel:${accompagnateurPhone}`}>Appeler {accompagnateurPhoneText}</a>
           {" · "}
           <a className="text-blue" href={accompagnateurWhatsApp} target="_blank" rel="noreferrer">WhatsApp</a>

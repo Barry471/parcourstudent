@@ -17,14 +17,18 @@ export function studentPlus(inFrance: boolean): MenuLink[] {
   ];
 }
 
-export function adminPlus(mail: boolean): MenuLink[] {
+export function adminPlus(mail: boolean, full = true): MenuLink[] {
   return [
     { href: "/admin/contact", label: "Contacts" },
     { href: "/admin/infos", label: "Informations" },
     { href: "/admin/alertes", label: "Alertes" },
-    { href: "/admin/groupes", label: "Groupes" },
-    { href: "/admin/liens", label: "Liens" },
-    { href: "/admin/videos", label: "Vidéos" },
-    ...(mail ? [{ href: "/admin/courrier", label: "Courrier" }] : []),
+    ...(full
+      ? [
+          { href: "/admin/groupes", label: "Groupes" },
+          { href: "/admin/liens", label: "Liens" },
+          { href: "/admin/videos", label: "Vidéos" },
+        ]
+      : []),
+    ...(mail && full ? [{ href: "/admin/courrier", label: "Courrier" }] : []),
   ];
 }

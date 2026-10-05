@@ -29,7 +29,7 @@ export default async function HomePage() {
     { href: "#guide", label: "Le guide" },
     { href: "/contact", label: "Contact" },
     user
-      ? { href: user.role === "admin" ? "/admin" : user.role === "accompagnateur" ? "/accompagnement" : "/parcours", label: user.role === "accompagnateur" ? "Accompagnement" : "Mon parcours" }
+      ? { href: user.role === "admin" || user.role === "accompagnateur" ? "/admin" : "/parcours", label: user.role === "accompagnateur" || user.role === "admin" ? "Administration" : "Mon parcours" }
       : { href: "/connexion", label: "Connexion" },
     ...(user ? [] : [{ href: "/inscription", label: "Compte" }]),
   ];
@@ -48,8 +48,8 @@ export default async function HomePage() {
       </p>
       <div className="mt-8 flex flex-wrap gap-3">
         {user ? (
-          <Link href={user.role === "admin" ? "/admin" : user.role === "accompagnateur" ? "/accompagnement" : "/parcours"} className="rounded-full bg-blue px-5 py-3 text-sm font-medium text-paper">
-            {user.role === "accompagnateur" ? "Ouvrir l'accompagnement" : "Ouvrir mon parcours"}
+          <Link href={user.role === "admin" || user.role === "accompagnateur" ? "/admin" : "/parcours"} className="rounded-full bg-blue px-5 py-3 text-sm font-medium text-paper">
+            {user.role === "admin" || user.role === "accompagnateur" ? "Ouvrir l'administration" : "Ouvrir mon parcours"}
           </Link>
         ) : (
           <>

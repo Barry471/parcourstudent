@@ -46,7 +46,7 @@ export default async function ContactPage({
             <textarea name="message" required minLength={10} maxLength={1000} rows={5} placeholder="Par exemple : je n'arrive pas à ouvrir Études en France" className={field} />
           </label>
           <p className="text-sm text-muted">
-            Ton message est lu par Thierno BARRY et Ibrahim Talibe DIALLO. Le détail est dans la{" "}
+            Ton message est lu par Thierno BARRY et Ibrahima Talibé DIALLO. Le détail est dans la{" "}
             <Link href="/confidentialite" className="text-blue underline">politique de confidentialité</Link>.
           </p>
           <button className="rounded-full bg-blue px-5 py-3 text-paper" type="submit">Envoyer</button>

@@ -21,10 +21,11 @@ export default async function AdminPage({
   searchParams: Promise<{ erreur?: string; etat?: string }>;
 }) {
   const user = await currentUser();
-  if (!user || user.role !== "admin") redirect("/");
+  if (!user || (user.role !== "admin" && user.role !== "accompagnateur")) redirect("/");
   const { erreur, etat } = await searchParams;
   const data = trafficSummary();
   const accompagnateur = findAccompagnateur();
+  const visibleDoors = user.role === "admin" ? doors : doors.filter((door) => !["/admin/groupes", "/admin/liens", "/admin/videos"].includes(door.href));
   return (
     <div className="mx-auto max-w-5xl px-5 py-12">
       <p className="text-sm uppercase tracking-[0.16em] text-blue">Administration</p>
@@ -36,7 +37,7 @@ export default async function AdminPage({
         <Card label="Comptes" value={data.users} />
       </div>
       <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-        {doors.map((door) => (
+        {visibleDoors.map((door) => (
           <li key={door.href}>
             <Link href={door.href} className="block rounded-2xl border border-line bg-card px-5 py-4 hover:border-blue">
               <span className="font-serif text-2xl">{door.title}</span>
@@ -45,9 +46,10 @@ export default async function AdminPage({
           </li>
         ))}
       </ul>
+      {user.role === "admin" && (
       <section className="mt-10 rounded-2xl border border-line bg-card px-5 py-5">
         <h2 className="font-serif text-2xl">Compte accompagnement</h2>
-        <p className="mt-2 text-sm text-muted">Ibrahim Talibe DIALLO ne voit que les personnes qui ont écrit pour un accompagnement.</p>
+        <p className="mt-2 text-sm text-muted">Ibrahima Talibé DIALLO voit le même tableau, sans les groupes, les liens ni les vidéos.</p>
         {etat === "accompagnement" && <p className="mt-3 text-sm text-blue">Le compte est enregistré.</p>}
         {erreur === "accompagnement" && <p className="mt-3 text-sm text-amber">L&apos;adresse est déjà prise, ou le mot de passe doit faire 12 caractères avec une lettre et un chiffre.</p>}
         <form action={saveAccompagnateurAction} className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -64,6 +66,7 @@ export default async function AdminPage({
           </button>
         </form>
       </section>
+      )}
       <h2 className="mt-10 font-serif text-2xl">Dernières visites</h2>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-card">
         <table className="w-full text-left text-sm">

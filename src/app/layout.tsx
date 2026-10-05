@@ -2,6 +2,7 @@ import { Fraunces, Outfit } from "next/font/google";
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { ChatBody, UnlessChat } from "@/components/RouteChrome";
 import { Header, Footer } from "@/components/SiteChrome";
 import { currentUser } from "@/lib/auth";
 import { trackVisit } from "@/lib/track";
@@ -26,14 +27,19 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   await trackVisit();
   const path = (await headers()).get("x-pathname") ?? "";
   const user = await currentUser();
-  if (user?.role === "accompagnateur" && path !== "/accompagnement") redirect("/accompagnement");
+  if (user?.role === "accompagnateur" && (path === "/accompagnement" || path.startsWith("/admin/groupes") || path.startsWith("/admin/liens") || path.startsWith("/admin/videos") || path.startsWith("/admin/courrier"))) {
+    redirect("/admin");
+  }
   const chat = path === "/messages";
   return (
     <html lang="fr" className={`${outfit.variable} ${fraunces.variable} h-full scroll-smooth antialiased`}>
       <body className={chat ? "flex h-dvh flex-col overflow-hidden pb-[calc(4.25rem+env(safe-area-inset-bottom))] md:pb-0" : "flex min-h-full flex-col pb-[calc(4.25rem+env(safe-area-inset-bottom))] md:pb-0"}>
+        <ChatBody />
         <Header />
-        <main className={chat ? "flex min-h-0 flex-1 flex-col" : "flex-1"}>{children}</main>
-        {chat ? null : <Footer />}
+        <main id="contenu" className={chat ? "flex min-h-0 flex-1 flex-col" : "flex-1"}>{children}</main>
+        <UnlessChat>
+          <Footer />
+        </UnlessChat>
       </body>
     </html>
   );

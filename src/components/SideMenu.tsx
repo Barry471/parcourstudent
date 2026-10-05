@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export function SideMenu({ items }: { items: { href: string; label: string }[] }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   return (
     <>
