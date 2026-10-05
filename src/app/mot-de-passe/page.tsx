@@ -28,7 +28,8 @@ export default async function PasswordPage({
           <p className="text-sm text-muted">
             L&apos;ancien mot de passe ne peut pas être relu. Indique ton e-mail : tu reçois un lien, valable une heure, pour en choisir un nouveau.
           </p>
-          {etat === "envoye" && <p className="text-sm text-amber">Si un compte existe avec cette adresse, un lien vient d&apos;être envoyé. Il expire dans une heure.</p>}
+          {etat === "envoye" && <p className="text-sm text-amber">Si un compte existe avec cette adresse, un lien vient d&apos;être envoyé. Il expire dans une heure. Regarde aussi les courriers indésirables.</p>}
+          {etat === "echec" && <p className="text-sm text-amber">Le message n&apos;est pas parti. Réessaie dans un moment.</p>}
           {etat === "local" && <p className="text-sm text-amber">En local, le lien n&apos;est pas envoyé sur internet. S&apos;il y a un compte, il est dans Administration, rubrique Courrier. Il expire dans une heure.</p>}
           {etat === "messagerie" && <p className="text-sm text-amber">Le lien par e-mail n&apos;est pas encore branché. Il partira dès que la messagerie est configurée.</p>}
           {erreur && <p className="text-sm text-amber">Ce lien n&apos;est plus valable. Demande-en un autre.</p>}

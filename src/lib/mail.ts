@@ -7,6 +7,14 @@ export function canSendMail() {
   return mailConfigured() || localMailEnabled();
 }
 
+function mailFrom() {
+  const configured = process.env.SMTP_FROM ?? "";
+  if (configured.includes("@")) return configured;
+  const user = process.env.SMTP_USER ?? "";
+  if (!user.includes("@")) return configured;
+  return `Parcourstudent en France <${user}>`;
+}
+
 export async function sendPasswordLink(to: string, name: string, link: string) {
   if (!mailConfigured()) {
     if (!localMailEnabled()) return false;
@@ -26,7 +34,7 @@ export async function sendPasswordLink(to: string, name: string, link: string) {
       : undefined,
   });
   await transport.sendMail({
-    from: process.env.SMTP_FROM,
+    from: mailFrom(),
     to,
     subject: "Parcourstudent en France — nouveau mot de passe",
     text: `${name},\n\nChoisis un nouveau mot de passe avec ce lien. Il expire dans une heure.\n\n${link}\n\nSi tu n'as rien demandé, ignore ce message.\n`,
@@ -55,7 +63,7 @@ export async function sendDueReminders(now = new Date()) {
     const alert = renewalAlert(student.titre_expires_on, now);
     if (alert.level === "calm" || alert.level === "missing") continue;
     await transport.sendMail({
-      from: process.env.SMTP_FROM,
+      from: mailFrom(),
       to: student.email,
       subject: `Parcourstudent en France — ${alert.title}`,
       text: `${student.name},\n\n${alert.text}\n\nOuvre Mon année dans Parcourstudent en France pour la liste des pièces, puis dépose sur le portail des étrangers.\n`,

@@ -442,15 +442,21 @@ export async function forgotPasswordAction(formData: FormData) {
   const local = !process.env.SMTP_HOST || !process.env.SMTP_FROM;
   if (!validEmail(email)) redirect(`/mot-de-passe?etat=${local ? "local" : "envoye"}`);
   const user = findUserByEmail(email);
-  if (user && user.active !== 0 && recentResetCount(user.id, new Date().toISOString()) < 3) {
+  if (user && user.active !== 0 && recentResetCount(user.id, new Date().toISOString()) < 10) {
     const token = randomBytes(32).toString("hex");
     const tokenHash = createHash("sha256").update(token).digest("hex");
     const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-    saveResetToken(user.id, tokenHash, expires);
     const headerList = await headers();
     const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "127.0.0.1:3457";
     const proto = headerList.get("x-forwarded-proto") ?? "http";
-    await sendPasswordLink(user.email, user.name, `${proto}://${host}/mot-de-passe?jeton=${token}`);
+    let sent = false;
+    try {
+      sent = await sendPasswordLink(user.email, user.name, `${proto}://${host}/mot-de-passe?jeton=${token}`);
+    } catch {
+      redirect("/mot-de-passe?etat=echec");
+    }
+    if (!sent) redirect("/mot-de-passe?etat=echec");
+    saveResetToken(user.id, tokenHash, expires);
   }
   redirect(`/mot-de-passe?etat=${local ? "local" : "envoye"}`);
 }
