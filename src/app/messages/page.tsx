@@ -4,8 +4,9 @@ import { allInfos, boardMessages, commentsFor, reactionEmojis, reactionsFor, typ
 import { requireUser } from "@/lib/guard";
 
 const errors: Record<string, string> = {
-  vide: "Écris un message avant d'envoyer.",
+  vide: "Écris un message, ou joins une image ou un PDF.",
   attente: "Tu as déjà envoyé plusieurs messages. Réessaie dans un moment.",
+  fichier: "Fichier refusé. Utilise une image JPG, PNG, WebP ou un PDF, de moins de 4 Mo.",
 };
 
 const clock = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" });
@@ -38,6 +39,8 @@ export default async function MessagesPage({
 }) {
   const user = await requireUser();
   const { erreur } = await searchParams;
+  const staff = user.role === "admin" || user.role === "accompagnateur";
+  const canWrite = user.role === "user" || staff;
   const messages = boardMessages();
   const messageIds = messages.map((message) => message.id);
   const reactions = reactionsFor(messageIds);
@@ -53,7 +56,7 @@ export default async function MessagesPage({
       <div className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col">
         <div id="fil" className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-[#e7eef8] bg-[radial-gradient(circle,#c5d4e8_0.7px,transparent_0.8px)] bg-[length:18px_18px] px-3 py-4 pb-28">
           <p className="mx-auto max-w-xs rounded-2xl bg-card/90 px-3 py-2 text-center text-xs leading-5 text-muted shadow-sm">
-            Tout le monde lit les mêmes messages. Les photos restent sur WhatsApp.
+            Tout le monde lit les mêmes messages. Seuls Thierno BARRY et Ibrahima Talibé DIALLO peuvent joindre une image ou un PDF.
           </p>
           {rows.length === 0 && (
             <p className="py-8 text-center text-sm text-muted">Aucun message pour le moment. Écris le premier.</p>
@@ -87,7 +90,8 @@ export default async function MessagesPage({
                     reactions={reactions.filter((item) => item.message_id === row.message.id)}
                     comments={comments.filter((item) => item.message_id === row.message.id)}
                     userId={user.id}
-                    canWrite={user.role === "user"}
+                    canWrite={canWrite}
+                    canModerate={staff}
                   />
                 )}
               </div>
@@ -96,20 +100,28 @@ export default async function MessagesPage({
         </div>
         <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 md:bottom-0">
           {erreur && <p className="bg-amber-soft px-4 py-2 text-center text-sm text-amber">{errors[erreur] ?? "Envoi impossible."}</p>}
-          {user.role === "user" ? (
-            <form action={postMessageAction} className="mx-auto flex max-w-lg items-end gap-2 border-t border-line bg-card/95 px-3 py-2 shadow-[0_-8px_24px_rgba(20,35,59,0.08)] backdrop-blur">
-              <label className="min-w-0 flex-1">
-                <span className="sr-only">Ton message</span>
-                <textarea
-                  name="body"
-                  required
-                  maxLength={500}
-                  rows={1}
-                  placeholder="Écris ton message"
-                  className="max-h-28 w-full resize-none rounded-3xl border border-line bg-paper px-4 py-3 text-base leading-5"
-                />
-              </label>
-              <button className="h-12 shrink-0 rounded-full bg-blue px-4 text-sm font-medium text-paper" type="submit">Envoyer</button>
+          {canWrite ? (
+            <form action={postMessageAction} className="mx-auto grid max-w-lg gap-2 border-t border-line bg-card/95 px-3 py-2 shadow-[0_-8px_24px_rgba(20,35,59,0.08)] backdrop-blur">
+              {staff && (
+                <label className="text-xs text-muted">
+                  Image ou PDF, facultatif
+                  <input name="file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="mt-1 block w-full text-sm" />
+                </label>
+              )}
+              <div className="flex items-end gap-2">
+                <label className="min-w-0 flex-1">
+                  <span className="sr-only">Ton message</span>
+                  <textarea
+                    name="body"
+                    required={!staff}
+                    maxLength={500}
+                    rows={1}
+                    placeholder={staff ? "Écris, ou envoie seulement l'image" : "Écris ton message"}
+                    className="max-h-28 w-full resize-none rounded-3xl border border-line bg-paper px-4 py-3 text-base leading-5"
+                  />
+                </label>
+                <button className="h-12 shrink-0 rounded-full bg-blue px-4 text-sm font-medium text-paper" type="submit">Envoyer</button>
+              </div>
             </form>
           ) : (
             <p className="border-t border-line bg-card px-4 py-3 text-center text-sm text-muted">Tu lis le groupe. Les étudiants écrivent ici.</p>
@@ -128,6 +140,7 @@ function MessageBubble({
   comments,
   userId,
   canWrite,
+  canModerate,
 }: {
   message: BoardMessage;
   mine: boolean;
@@ -136,6 +149,7 @@ function MessageBubble({
   comments: MessageComment[];
   userId: number;
   canWrite: boolean;
+  canModerate: boolean;
 }) {
   const counts = reactionEmojis
     .map((emoji) => ({
@@ -149,7 +163,13 @@ function MessageBubble({
     <article className={mine ? "ml-auto w-fit max-w-[85%]" : "mr-auto w-fit max-w-[85%]"}>
       <div className={mine ? "rounded-2xl rounded-br-md bg-blue px-3.5 py-2.5 text-paper shadow-sm" : "rounded-2xl rounded-bl-md bg-card px-3.5 py-2.5 shadow-sm"}>
         {!mine && <p className={`text-xs font-medium ${nameTone(message.name)}`}>{message.name}</p>}
-        <p className="mt-0.5 whitespace-pre-wrap text-base leading-5">{message.body}</p>
+        {message.body && <p className="mt-0.5 whitespace-pre-wrap text-base leading-5">{message.body}</p>}
+        {message.media_mime.startsWith("image/") && (
+          <img src={`/messages/media/${message.id}`} alt="Image du message" className="mt-2 max-h-64 w-full rounded-xl bg-paper object-contain" />
+        )}
+        {message.media_mime === "application/pdf" && (
+          <a href={`/messages/media/${message.id}`} className={mine ? "mt-2 inline-block text-sm text-paper underline" : "mt-2 inline-block text-sm text-blue underline"}>Ouvrir le PDF</a>
+        )}
         <p className={mine ? "mt-1 text-right text-[11px] text-paper/70" : "mt-1 text-right text-[11px] text-muted"}>{time}</p>
       </div>
       {counts.length > 0 && (
@@ -165,7 +185,7 @@ function MessageBubble({
             <li key={comment.id} className="rounded-xl border border-line bg-card/90 px-2.5 py-1.5">
               <p className={`text-[11px] font-medium ${nameTone(comment.name)}`}>{comment.name}</p>
               <p className="text-sm leading-5">{comment.body}</p>
-              {(comment.user_id === userId || !canWrite) && (
+              {(comment.user_id === userId || canModerate) && (
                 <form action={deleteCommentAction}>
                   <input type="hidden" name="id" value={comment.id} />
                   <button className="text-[11px] text-amber" type="submit">Retirer</button>
@@ -193,7 +213,7 @@ function MessageBubble({
               <button className="rounded-full bg-blue px-3 py-2 text-xs text-paper" type="submit">OK</button>
             </form>
           </details>
-          {mine && (
+          {(mine || canModerate) && (
             <form action={deleteMessageAction}>
               <input type="hidden" name="id" value={message.id} />
               <button className="text-xs text-amber" type="submit">Retirer</button>

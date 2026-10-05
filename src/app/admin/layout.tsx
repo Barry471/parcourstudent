@@ -8,7 +8,7 @@ const links = [
   { href: "/admin", label: "Tableau" },
   { href: "/admin/etudiants", label: "Étudiants" },
   { href: "/admin/alertes", label: "Alertes" },
-  { href: "/admin/messages", label: "Messages" },
+  { href: "/messages", label: "Messages" },
   { href: "/admin/contact", label: "Contacts" },
   { href: "/admin/infos", label: "Informations" },
   { href: "/admin/groupes", label: "Groupes" },

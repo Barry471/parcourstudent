@@ -71,7 +71,10 @@ export async function Header() {
             </>
           )}
           {(user?.role === "admin" || user?.role === "accompagnateur") && (
-            <Link href="/admin" className="hover:text-blue">Administration</Link>
+            <>
+              <Link href="/messages" className="hover:text-blue">Messages</Link>
+              <Link href="/admin" className="hover:text-blue">Administration</Link>
+            </>
           )}
           {user ? (
             <a href="/sortir" className="text-muted hover:text-blue">Sortir</a>

@@ -59,6 +59,7 @@ import {
 import { clearSession, setSession } from "@/lib/auth";
 import { cleanEmail, cleanText, newPasswordOk, passwordOk, safeNext, validEmail } from "@/lib/input";
 import { removeInfoFile, saveInfoFile, sniffInfo } from "@/lib/infoFiles";
+import { saveMessageMedia } from "@/lib/messageMedia";
 import { broadcastChat } from "@/lib/live";
 import { canSendMail, sendPasswordLink } from "@/lib/mail";
 import { dummyPasswordHash, hashPassword, verifyPassword } from "@/lib/password";
@@ -320,21 +321,43 @@ export async function deleteAlertAction(formData: FormData) {
   redirect("/admin/alertes");
 }
 
+function inGroup(role: string) {
+  return role === "user" || role === "admin" || role === "accompagnateur";
+}
+
 export async function postMessageAction(formData: FormData) {
   const user = await currentUser();
-  if (!user || user.role !== "user" || user.active === 0) redirect("/connexion");
+  if (!user || user.active === 0 || !inGroup(user.role)) redirect("/connexion");
+  const staff = user.role === "admin" || user.role === "accompagnateur";
   const body = cleanText(formData.get("body"), 500);
-  if (body.length < 1) redirect("/messages?erreur=vide");
+  const file = formData.get("file");
+  let bytes: Buffer | null = null;
+  let mime = "";
+  if (staff && file instanceof File && file.size > 0) {
+    if (file.size > 4 * 1024 * 1024) redirect("/messages?erreur=fichier");
+    bytes = Buffer.from(await file.arrayBuffer());
+    mime = sniffInfo(bytes);
+    if (!mime) redirect("/messages?erreur=fichier");
+  }
+  if (body.length < 1 && !mime) redirect("/messages?erreur=vide");
   const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  if (recentMessageCount(user.id, since) >= 12) redirect("/messages?erreur=attente");
-  addMessage(user.id, body);
+  if (recentMessageCount(user.id, since) >= (staff ? 40 : 12)) redirect("/messages?erreur=attente");
+  const id = addMessage(user.id, body, mime);
+  if (bytes) {
+    try {
+      saveMessageMedia(id, bytes);
+    } catch {
+      deleteMessage(id);
+      redirect("/messages?erreur=fichier");
+    }
+  }
   broadcastChat();
   redirect("/messages");
 }
 
 export async function reactMessageAction(formData: FormData) {
   const user = await currentUser();
-  if (!user || user.role !== "user" || user.active === 0) redirect("/connexion");
+  if (!user || user.active === 0 || !inGroup(user.role)) redirect("/connexion");
   const id = Number(formData.get("id"));
   const emoji = String(formData.get("emoji") ?? "");
   if (!Number.isInteger(id) || id <= 0 || !reactionEmojis.includes(emoji as (typeof reactionEmojis)[number])) redirect("/messages");
@@ -345,7 +368,7 @@ export async function reactMessageAction(formData: FormData) {
 
 export async function commentMessageAction(formData: FormData) {
   const user = await currentUser();
-  if (!user || user.role !== "user" || user.active === 0) redirect("/connexion");
+  if (!user || user.active === 0 || !inGroup(user.role)) redirect("/connexion");
   const id = Number(formData.get("id"));
   const body = cleanText(formData.get("body"), 300);
   if (!Number.isInteger(id) || id <= 0 || body.length < 1) redirect("/messages");
@@ -373,11 +396,11 @@ export async function deleteMessageAction(formData: FormData) {
   if (!user || user.active === 0) redirect("/connexion");
   const id = Number(formData.get("id"));
   const staff = user.role === "admin" || user.role === "accompagnateur";
-  if (!Number.isInteger(id) || id <= 0) redirect(staff ? "/admin/messages" : "/messages");
+  if (!Number.isInteger(id) || id <= 0) redirect("/messages");
   if (staff) deleteMessage(id);
   else deleteOwnMessage(id, user.id);
   broadcastChat();
-  redirect(staff ? "/admin/messages" : "/messages");
+  redirect("/messages");
 }
 
 export async function publishInfoAction(formData: FormData) {

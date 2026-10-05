@@ -7,7 +7,7 @@ import { findAccompagnateur, trafficSummary } from "@/lib/db";
 const doors = [
   { href: "/admin/etudiants", title: "Étudiants", text: "Classés par ville. Ajouter, activer, mot de passe, supprimer." },
   { href: "/admin/alertes", title: "Alertes", text: "Un message à tout le monde, ou à un pays et une ville." },
-  { href: "/admin/messages", title: "Messages", text: "Les textes des étudiants. Tu peux en retirer un." },
+  { href: "/messages", title: "Messages", text: "Le même groupe que les étudiants. Tu écris, avec ou sans image ou PDF." },
   { href: "/admin/contact", title: "Contacts", text: "Les personnes qui ont écrit pour un accompagnement." },
   { href: "/admin/infos", title: "Informations", text: "Une image ou un PDF publié par toi. Les étudiants n'en envoient pas." },
   { href: "/admin/groupes", title: "Groupes", text: "WhatsApp et Telegram, pour les candidatures ou pour une ville." },

@@ -11,7 +11,7 @@ const kept = [
   "Les pages ouvertes pendant que tu es connecté : le chemin et la date. L'adresse IP n'est pas enregistrée.",
   "L'e-mail d'un essai de connexion raté, le temps de freiner les répétitions. Il est effacé quand cette adresse se connecte.",
   "Le lien de mot de passe oublié, sous forme chiffrée, pendant une heure.",
-  "Les messages que tu écris aux autres étudiants, avec ton nom, jusqu'à ce que le message soit retiré.",
+  "Les messages du groupe, avec le nom de celui qui écrit, jusqu'à ce que le message soit retiré. Une image ou un PDF peut y être joint par Thierno BARRY ou Ibrahima Talibé DIALLO. Les étudiants n'en envoient pas.",
   "Le formulaire de contact : ton nom, ton e-mail, ton numéro si tu le donnes, et ton message. Thierno BARRY et Ibrahima Talibé DIALLO le voient.",
   "Les images et les PDF publiés par l'administration pour informer. Tu ne peux pas en envoyer.",
 ];

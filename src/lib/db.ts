@@ -2,6 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import fs from "fs";
 import path from "path";
 import { accompagnateurName } from "@/lib/accompagnement";
+import { removeMessageMedia } from "@/lib/messageMedia";
 import { hashPassword } from "@/lib/password";
 
 export type User = {
@@ -190,6 +191,7 @@ db.exec(`
     created_at TEXT NOT NULL
   );
 `);
+addColumn("messages", "media_mime", "TEXT NOT NULL DEFAULT ''");
 
 function seedAdmin() {
   const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
@@ -524,7 +526,10 @@ export function askPasswordHelp(userId: number) {
 
 export function deleteStudent(userId: number) {
   const owned = db.prepare("SELECT id FROM messages WHERE user_id = ?").all(userId) as { id: number }[];
-  for (const row of owned) clearMessageExtras(row.id);
+  for (const row of owned) {
+    clearMessageExtras(row.id);
+    removeMessageMedia(row.id);
+  }
   db.prepare("DELETE FROM message_reactions WHERE user_id = ?").run(userId);
   db.prepare("DELETE FROM message_comments WHERE user_id = ?").run(userId);
   db.prepare("DELETE FROM messages WHERE user_id = ?").run(userId);
@@ -542,6 +547,7 @@ export type BoardMessage = {
   user_id: number;
   name: string;
   body: string;
+  media_mime: string;
   created_at: string;
 };
 
@@ -552,14 +558,17 @@ export function recentMessageCount(userId: number, sinceIso: string) {
   return row.count;
 }
 
-export function addMessage(userId: number, body: string) {
-  db.prepare("INSERT INTO messages (user_id, body, created_at) VALUES (?, ?, ?)").run(userId, body, new Date().toISOString());
+export function addMessage(userId: number, body: string, mediaMime = "") {
+  const result = db
+    .prepare("INSERT INTO messages (user_id, body, media_mime, created_at) VALUES (?, ?, ?, ?)")
+    .run(userId, body, mediaMime, new Date().toISOString());
+  return Number(result.lastInsertRowid);
 }
 
 export function boardMessages() {
   const rows = db
     .prepare(
-      `SELECT messages.id, messages.user_id, users.name, messages.body, messages.created_at
+      `SELECT messages.id, messages.user_id, users.name, messages.body, messages.media_mime, messages.created_at
        FROM messages JOIN users ON users.id = messages.user_id
        ORDER BY messages.id DESC LIMIT 80`,
     )
@@ -567,8 +576,14 @@ export function boardMessages() {
   return rows.reverse();
 }
 
+export function messageMediaMime(id: number) {
+  const row = db.prepare("SELECT media_mime FROM messages WHERE id = ?").get(id) as { media_mime: string } | undefined;
+  return row?.media_mime || "";
+}
+
 export function deleteMessage(id: number) {
   clearMessageExtras(id);
+  removeMessageMedia(id);
   db.prepare("DELETE FROM messages WHERE id = ?").run(id);
 }
 
@@ -576,6 +591,7 @@ export function deleteOwnMessage(id: number, userId: number) {
   const row = db.prepare("SELECT id FROM messages WHERE id = ? AND user_id = ?").get(id, userId) as { id: number } | undefined;
   if (!row) return;
   clearMessageExtras(id);
+  removeMessageMedia(id);
   db.prepare("DELETE FROM messages WHERE id = ?").run(id);
 }
 

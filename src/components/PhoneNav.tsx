@@ -93,7 +93,7 @@ export function PhoneNav({
           <div className="grid grid-cols-4">
             <Tab href="/admin" label="Tableau" active={pathname === "/admin"} icon="home" />
             <Tab href="/admin/etudiants" label="Étudiants" active={pathname.startsWith("/admin/etudiants")} icon="user" />
-            <Tab href="/admin/messages" label="Messages" active={pathname.startsWith("/admin/messages")} icon="chat" />
+            <Tab href="/messages" label="Messages" active={pathname === "/messages"} icon="chat" />
             <MenuTab label="Plus" active={plusActive || sheet === "plus"} open={sheet === "plus"} onClick={() => setSheet(sheet === "plus" ? null : "plus")} icon="more" />
           </div>
         )}
