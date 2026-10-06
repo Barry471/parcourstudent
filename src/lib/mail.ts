@@ -33,11 +33,97 @@ function smtpAttempts() {
   });
 }
 
+const ZIMBRA_SOAP = "https://zimbra1.mail.ovh.net/service/soap";
+
+function zimbraText(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return zimbraText(value[0]);
+  if (value && typeof value === "object" && "_content" in value) {
+    const content = (value as { _content?: unknown })._content;
+    return typeof content === "string" ? content : "";
+  }
+  return "";
+}
+
+async function zimbraCall(payload: Record<string, unknown>) {
+  const response = await fetch(ZIMBRA_SOAP, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(12000),
+  });
+  return (await response.json()) as {
+    Body?: {
+      AuthResponse?: { authToken?: unknown; csrfToken?: unknown };
+      SendMsgResponse?: unknown;
+      Fault?: { Detail?: { Error?: { Code?: string } } };
+    };
+  };
+}
+
+async function deliverViaWebmail(message: { to: string; subject: string; text: string }) {
+  const user = process.env.SMTP_USER ?? "";
+  const pass = process.env.SMTP_PASS ?? "";
+  if (!user.includes("@") || !pass) {
+    throw Object.assign(new Error("EAUTH"), { code: "EAUTH" });
+  }
+  const auth = await zimbraCall({
+    Header: { context: { _jsns: "urn:zimbra" } },
+    Body: {
+      AuthRequest: {
+        _jsns: "urn:zimbraAccount",
+        account: { _content: user, by: "name" },
+        password: pass,
+      },
+    },
+  });
+  const authFault = auth.Body?.Fault?.Detail?.Error?.Code;
+  const token = zimbraText(auth.Body?.AuthResponse?.authToken);
+  if (authFault || !token) {
+    throw Object.assign(new Error(authFault || "EAUTH"), { code: authFault || "EAUTH" });
+  }
+  const csrf = zimbraText(auth.Body?.AuthResponse?.csrfToken);
+  const sent = await zimbraCall({
+    Header: {
+      context: {
+        _jsns: "urn:zimbra",
+        authToken: token,
+        ...(csrf ? { csrfToken: csrf } : {}),
+      },
+    },
+    Body: {
+      SendMsgRequest: {
+        _jsns: "urn:zimbraMail",
+        m: {
+          e: [
+            { t: "t", a: message.to },
+            { t: "f", a: user },
+          ],
+          su: message.subject,
+          mp: { ct: "text/plain", content: message.text },
+        },
+      },
+    },
+  });
+  const sendFault = sent.Body?.Fault?.Detail?.Error?.Code;
+  if (sendFault || !sent.Body?.SendMsgResponse) {
+    throw Object.assign(new Error(sendFault || "WEBMAIL_SEND"), { code: sendFault || "WEBMAIL_SEND" });
+  }
+}
+
 async function deliver(message: { from: string; to: string; subject: string; text: string }) {
   const auth = process.env.SMTP_USER
     ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
     : undefined;
   let lastError: unknown;
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      await deliverViaWebmail(message);
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
   for (const attempt of smtpAttempts()) {
     const transport = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
