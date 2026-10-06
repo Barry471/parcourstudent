@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   title: "Parcourstudent en France",
   description:
     "Parcourstudent en France guide les étudiants de la candidature jusqu'aux démarches en France. Aucun document n'est déposé sur le site.",
+  verification: {
+    google: "wedXmW5Q5IKoGtr-yLKF2xMzQZQ-FexUwXOGu38bo-c",
+  },
 };
 
 export const viewport: Viewport = {
