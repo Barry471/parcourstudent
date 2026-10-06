@@ -1,3 +1,4 @@
+import { PasswordRequestButton } from "@/components/PasswordRequestButton";
 import { choosePasswordAction, forgotPasswordAction } from "@/lib/actions";
 
 export default async function PasswordPage({
@@ -37,7 +38,7 @@ export default async function PasswordPage({
             Adresse e-mail
             <input name="email" type="email" required maxLength={160} autoComplete="email" className="rounded-2xl border border-line bg-card px-4 py-3" />
           </label>
-          <button className="rounded-full bg-blue px-5 py-3 text-paper" type="submit">Demander un nouveau mot de passe</button>
+          <PasswordRequestButton />
         </form>
       )}
     </div>

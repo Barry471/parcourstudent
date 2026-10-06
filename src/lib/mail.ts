@@ -19,8 +19,8 @@ function smtpAttempts() {
   const configuredPort = Number(process.env.SMTP_PORT ?? 465);
   const configuredSecure = process.env.SMTP_SECURE === "1" || configuredPort === 465;
   const attempts = [
-    { port: configuredPort, secure: configuredSecure },
     { port: 587, secure: false },
+    { port: configuredPort, secure: configuredSecure },
     { port: 465, secure: true },
   ];
   const seen = new Set<string>();
