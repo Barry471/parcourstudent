@@ -1,6 +1,5 @@
 import { accompagnateurName } from "@/lib/accompagnement";
-
-const contactEmail = "";
+import { contactEmail } from "@/lib/site";
 
 const kept = [
   "Ton prénom et ton nom, et l'adresse e-mail du compte.",

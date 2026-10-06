@@ -2,7 +2,9 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { PhoneNav } from "@/components/PhoneNav";
 import { ChatBanner, ChatRow } from "@/components/RouteChrome";
+import { LockIcon } from "@/components/Lock";
 import { accompagnateurName, accompagnateurPhone, accompagnateurPhoneText, accompagnateurWhatsApp } from "@/lib/accompagnement";
+import { contactEmail } from "@/lib/site";
 import { currentUser } from "@/lib/auth";
 import { candidatures } from "@/lib/candidatures";
 import { linksForCategory } from "@/lib/db";
@@ -64,7 +66,10 @@ export async function Header() {
                 <summary className="cursor-pointer list-none hover:text-blue">Plus</summary>
                 <div className="absolute right-0 z-10 mt-2 w-48 rounded-2xl border border-line bg-card p-2 shadow-sm">
                   {plus.map((item) => (
-                    <Link key={item.href} href={item.href} className="block rounded-xl px-3 py-2 hover:bg-paper">{item.label}</Link>
+                    <Link key={item.href} href={item.href} className="flex items-center gap-2 rounded-xl px-3 py-2 hover:bg-paper">
+                      {item.href === "/compte" && <LockIcon className="h-3.5 w-3.5 shrink-0" />}
+                      {item.label}
+                    </Link>
                   ))}
                 </div>
               </details>
@@ -80,13 +85,16 @@ export async function Header() {
             <a href="/sortir" className="text-muted hover:text-blue">Sortir</a>
           ) : (
             <>
-              <Link href="/connexion" className="hover:text-blue">Connexion</Link>
+              <Link href="/connexion" className="inline-flex items-center gap-1.5 hover:text-blue"><LockIcon className="h-3.5 w-3.5" />Connexion</Link>
               <Link href="/inscription" className="rounded-full bg-blue px-3 py-1.5 text-paper">Créer un compte</Link>
               <details className="relative">
                 <summary className="cursor-pointer list-none hover:text-blue">Plus</summary>
                 <div className="absolute right-0 z-10 mt-2 w-48 rounded-2xl border border-line bg-card p-2 shadow-sm">
                   {plus.map((item) => (
-                    <Link key={item.href} href={item.href} className="block rounded-xl px-3 py-2 hover:bg-paper">{item.label}</Link>
+                    <Link key={item.href} href={item.href} className="flex items-center gap-2 rounded-xl px-3 py-2 hover:bg-paper">
+                      {item.href === "/compte" && <LockIcon className="h-3.5 w-3.5 shrink-0" />}
+                      {item.label}
+                    </Link>
                   ))}
                 </div>
               </details>
@@ -119,7 +127,11 @@ export function Footer() {
           {" · "}
           <a className="text-blue" href={accompagnateurWhatsApp} target="_blank" rel="noreferrer">WhatsApp</a>
         </p>
-        <p className="mt-3"><Link href="/contact" className="text-blue">Contact</Link></p>
+        <p className="mt-3">
+          <Link href="/contact" className="text-blue">Contact</Link>
+          {" · "}
+          <a className="text-blue" href={`mailto:${contactEmail}`}>{contactEmail}</a>
+        </p>
         {socials.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-3">
             {socials.map((item) => (

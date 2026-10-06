@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LockIcon } from "@/components/Lock";
 import { SideMenu } from "@/components/SideMenu";
 import { currentUser } from "@/lib/auth";
 import { guides } from "@/lib/content";
@@ -56,7 +57,8 @@ export default async function HomePage() {
             <Link href="/inscription" className="rounded-full bg-blue px-5 py-3 text-sm font-medium text-paper">
               Créer mon compte
             </Link>
-            <Link href="/connexion" className="rounded-full border border-line bg-card px-5 py-3 text-sm">
+            <Link href="/connexion" className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-5 py-3 text-sm">
+              <LockIcon className="h-4 w-4" />
               J&apos;ai déjà un compte
             </Link>
           </>

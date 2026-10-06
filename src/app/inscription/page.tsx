@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LockedPassword } from "@/components/Lock";
 import { registerAction } from "@/lib/actions";
 import { cities, countries, undecidedCity } from "@/lib/content";
 
@@ -38,7 +39,7 @@ export default async function RegisterPage({
           </label>
           <label className="grid gap-1 text-sm">
             Mot de passe
-            <input name="password" type="password" required minLength={12} maxLength={72} autoComplete="new-password" placeholder="12 caractères, avec un chiffre" className={field} />
+            <LockedPassword name="password" required minLength={12} maxLength={72} autoComplete="new-password" placeholder="12 caractères, avec un chiffre" className={field} />
           </label>
         </fieldset>
         <fieldset className="grid gap-3">

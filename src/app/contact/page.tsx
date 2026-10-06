@@ -1,5 +1,6 @@
 import { contactAction } from "@/lib/actions";
 import { currentUser } from "@/lib/auth";
+import { contactEmail } from "@/lib/site";
 import Link from "next/link";
 
 const errors: Record<string, string> = {
@@ -23,7 +24,8 @@ export default async function ContactPage({
       <p className="text-sm uppercase tracking-[0.16em] text-blue">Contact</p>
       <h1 className="mt-2 font-serif text-4xl">Accompagnement personnalisé</h1>
       <p className="mt-3 text-muted">
-        Tu écris ici si tu veux qu&apos;on t&apos;appelle pour avancer sur un formulaire. C&apos;est toi qui appuies. S&apos;il y a un prix, il est dit avant le premier appel. Le paiement ne passe pas par ce site.
+        Tu écris ici si tu veux qu&apos;on t&apos;appelle pour avancer sur un formulaire. C&apos;est toi qui appuies. S&apos;il y a un prix, il est dit avant le premier appel. Le paiement ne passe pas par ce site. Tu peux aussi écrire à{" "}
+        <a className="text-blue underline" href={`mailto:${contactEmail}`}>{contactEmail}</a>.
       </p>
       {sent && <p className="mt-4 text-sm text-blue">C&apos;est envoyé. La réponse arrive sur l&apos;adresse que tu as écrite.</p>}
       {erreur && errors[erreur] && <p className="mt-4 text-sm text-amber">{errors[erreur]}</p>}

@@ -1,3 +1,4 @@
+import { LockIcon, LockedPassword } from "@/components/Lock";
 import { PasswordRequestButton } from "@/components/PasswordRequestButton";
 import { choosePasswordAction, forgotPasswordAction } from "@/lib/actions";
 
@@ -10,7 +11,7 @@ export default async function PasswordPage({
   const token = jeton && /^[a-f0-9]{64}$/.test(jeton) ? jeton : "";
   return (
     <div className="mx-auto max-w-md px-5 py-14">
-      <p className="text-sm uppercase tracking-[0.16em] text-blue">Mot de passe</p>
+      <p className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.16em] text-blue"><LockIcon className="h-4 w-4" />Mot de passe</p>
       <h1 className="mt-2 font-serif text-4xl">{token ? "Choisis un nouveau mot de passe" : "Mot de passe oublié"}</h1>
       {token ? (
         <form action={choosePasswordAction} className="mt-6 grid gap-3">
@@ -20,7 +21,7 @@ export default async function PasswordPage({
           {erreur === "mdp" && <p className="text-sm text-amber">Le mot de passe doit faire 12 caractères, avec une lettre et un chiffre.</p>}
           <label className="grid gap-1 text-sm">
             Nouveau mot de passe
-            <input name="password" type="password" required minLength={12} maxLength={72} autoComplete="new-password" placeholder="12 caractères, avec un chiffre" className="rounded-2xl border border-line bg-card px-4 py-3" />
+            <LockedPassword name="password" required minLength={12} maxLength={72} autoComplete="new-password" placeholder="12 caractères, avec un chiffre" className="rounded-2xl border border-line bg-card px-4 py-3" />
           </label>
           <button className="rounded-full bg-blue px-5 py-3 text-paper" type="submit">Enregistrer</button>
         </form>

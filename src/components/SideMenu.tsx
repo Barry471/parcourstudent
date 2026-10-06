@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { LockIcon } from "@/components/Lock";
 
 export function SideMenu({ items }: { items: { href: string; label: string }[] }) {
   const [open, setOpen] = useState(false);
@@ -27,7 +28,10 @@ export function SideMenu({ items }: { items: { href: string; label: string }[] }
               {item.href.startsWith("#") ? (
                 <a href={item.href} onClick={() => setOpen(false)} className="block rounded-2xl px-3 py-3 text-base hover:bg-paper">{item.label}</a>
               ) : (
-                <Link href={item.href} onClick={() => setOpen(false)} className="block rounded-2xl px-3 py-3 text-base hover:bg-paper">{item.label}</Link>
+                <Link href={item.href} onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-2xl px-3 py-3 text-base hover:bg-paper">
+                  {item.href === "/connexion" && <LockIcon className="h-4 w-4 shrink-0" />}
+                  {item.label}
+                </Link>
               )}
             </li>
           ))}

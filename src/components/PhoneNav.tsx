@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LockIcon } from "@/components/Lock";
 
 type LinkItem = { href: string; label: string };
 
@@ -62,7 +63,7 @@ export function PhoneNav({
         {mode === "guest" && (
           <div className="grid grid-cols-4">
             <Tab href="/" label="Accueil" active={pathname === "/"} icon="home" />
-            <Tab href="/connexion" label="Connexion" active={pathname.startsWith("/connexion")} icon="key" />
+            <Tab href="/connexion" label="Connexion" active={pathname.startsWith("/connexion")} icon="lock" />
             <Tab href="/inscription" label="Compte" active={pathname.startsWith("/inscription")} icon="user" />
             <MenuTab label="Plus" active={plusActive || sheet === "plus"} open={sheet === "plus"} onClick={() => setSheet(sheet === "plus" ? null : "plus")} icon="more" />
           </div>
@@ -106,7 +107,10 @@ function SheetLinks({ items }: { items: LinkItem[] }) {
   return (
     <>
       {items.map((item) => (
-        <Link key={item.href} href={item.href} className="block rounded-2xl px-4 py-3 hover:bg-paper">{item.label}</Link>
+        <Link key={item.href} href={item.href} className="flex items-center gap-2 rounded-2xl px-4 py-3 hover:bg-paper">
+          {(item.href === "/connexion" || item.href === "/compte") && <LockIcon className="h-4 w-4 shrink-0" />}
+          {item.label}
+        </Link>
       ))}
     </>
   );
@@ -130,7 +134,7 @@ function MenuTab({ label, active, open, onClick, icon }: { label: string; active
   );
 }
 
-type IconName = "home" | "calendar" | "list" | "chat" | "more" | "key" | "user";
+type IconName = "home" | "calendar" | "list" | "chat" | "more" | "key" | "user" | "lock";
 
 function Icon({ name }: { name: IconName }) {
   const common = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true, className: "h-5 w-5" };
@@ -139,6 +143,7 @@ function Icon({ name }: { name: IconName }) {
   if (name === "list") return <svg {...common}><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01" /></svg>;
   if (name === "chat") return <svg {...common}><path d="M6 17.5 4 20V6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5v9A1.5 1.5 0 0 1 18.5 17H6Z" /></svg>;
   if (name === "key") return <svg {...common}><circle cx="8" cy="12" r="3.2" /><path d="M11 12h9l-2 2 2 2" /></svg>;
+  if (name === "lock") return <LockIcon className="h-5 w-5" />;
   if (name === "user") return <svg {...common}><circle cx="12" cy="8" r="3" /><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" /></svg>;
   return <svg {...common}><circle cx="6" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="18" cy="12" r="1" /></svg>;
 }
