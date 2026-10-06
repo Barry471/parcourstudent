@@ -34,6 +34,15 @@ body {
   font-family: var(--font-outfit), sans-serif;
 }
 
+/* 16px empêche iOS d'agrandir la page quand on touche un champ. Le pincement reste possible. */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 ::selection {
   background: #d6e4f7;
 }
