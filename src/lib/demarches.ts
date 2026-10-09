@@ -154,7 +154,7 @@ export const demarches: Demarche[] = [
     menu: "Logement",
     category: "logement",
     forSituations: ["admission", "visa", "annee1", "suivante"],
-    intro: "Du premier lit jusqu'au bail. Rien ne se paie avant une visite et un contrat. Les sites utiles sont juste en dessous.",
+    intro: "Du premier lit jusqu'au bail. Rien ne se paie avant une visite et un contrat.",
     steps: [
       {
         id: "lo-chercher",

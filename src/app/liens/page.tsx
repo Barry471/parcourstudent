@@ -1,9 +1,21 @@
+import Link from "next/link";
 import { UsefulLinks } from "@/components/UsefulLinks";
 import { allLinks } from "@/lib/db";
 import { requireUser } from "@/lib/guard";
+import { phaseOf } from "@/lib/moments";
 
 export default async function LiensPage() {
-  await requireUser();
+  const user = await requireUser();
+  if (phaseOf(user.situation) !== "france") {
+    return (
+      <div className="mx-auto max-w-3xl px-5 py-8 md:py-12">
+        <p className="text-sm uppercase tracking-[0.16em] text-blue">Après le visa</p>
+        <h1 className="mt-2 font-serif text-4xl">Liens utiles</h1>
+        <p className="mt-3 text-muted">Ces liens s&apos;affichent quand tu indiques que tu as le visa.</p>
+        <Link href="/annee" className="mt-6 inline-block rounded-full bg-blue px-4 py-2 text-sm text-paper">Dire ma situation</Link>
+      </div>
+    );
+  }
   const links = allLinks();
   return (
     <div className="mx-auto max-w-3xl px-5 py-8 md:py-12">

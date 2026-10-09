@@ -27,7 +27,7 @@ export default async function ParcoursPage() {
   const chapter = user.situation ? chapters[user.situation] : undefined;
   const inFrance = phaseOf(user.situation) === "france";
   const alerts = user.role === "user" ? alertsFor(user.country, user.city) : [];
-  const usefulLinks = allLinks();
+  const usefulLinks = inFrance ? allLinks() : [];
   const visible = inFrance
     ? demarches.filter((item) => item.forSituations.includes(user.situation ?? ""))
     : demarches.filter((item) => item.id === "budget");
@@ -44,7 +44,7 @@ export default async function ParcoursPage() {
 
       {user.role === "user" && <NowCard step={nextFor(user, done)} />}
 
-      {usefulLinks.some((link) => link.category !== "reseau") && (
+      {inFrance && usefulLinks.some((link) => link.category !== "reseau") && (
         <section className="mt-8 rounded-3xl border border-blue bg-card p-5">
           <h2 className="font-serif text-2xl">Liens importants</h2>
           <p className="mt-2 text-sm text-muted">Transport, logement, banque et les autres sites dont tu as besoin. Ouvre la carte.</p>

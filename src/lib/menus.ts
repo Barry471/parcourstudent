@@ -7,12 +7,16 @@ export const guestPlus: MenuLink[] = [
 
 export function studentPlus(inFrance: boolean): MenuLink[] {
   return [
-    { href: "/liens", label: "Liens utiles" },
     { href: "/contact", label: "Contact" },
     { href: "/recherche", label: "Recherche" },
     { href: "/pays", label: "Mon pays" },
     { href: "/alertes", label: "Alertes" },
-    ...(inFrance ? [{ href: "/aides", label: "Aides" }] : []),
+    ...(inFrance
+      ? [
+          { href: "/liens", label: "Liens utiles" },
+          { href: "/aides", label: "Aides" },
+        ]
+      : []),
     { href: "/compte", label: "Mot de passe" },
     { href: "/confidentialite", label: "Confidentialité" },
   ];

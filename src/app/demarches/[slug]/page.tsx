@@ -8,6 +8,7 @@ import { ProcedureHero } from "@/components/ProcedureCard";
 import { photoFor } from "@/lib/photos";
 import { doneSteps, linksForCategory, videosFor } from "@/lib/db";
 import { requireUser } from "@/lib/guard";
+import { phaseOf } from "@/lib/moments";
 
 export function generateStaticParams() {
   return demarches.map((item) => ({ slug: item.id }));
@@ -19,10 +20,12 @@ export default async function DemarchePage({ params }: { params: Promise<{ slug:
   const demarche = demarcheById(slug);
   if (!demarche) notFound();
   const done = new Set(doneSteps(user.id));
-  const partners = [
-    ...linksForCategory(demarche.category),
-    ...(demarche.id === "quotidien" ? linksForCategory("transport") : []),
-  ].filter((link, index, all) => all.findIndex((item) => item.id === link.id) === index);
+  const partners = phaseOf(user.situation) === "france"
+    ? [
+        ...linksForCategory(demarche.category),
+        ...(demarche.id === "quotidien" ? linksForCategory("transport") : []),
+      ].filter((link, index, all) => all.findIndex((item) => item.id === link.id) === index)
+    : [];
   const finished = demarche.steps.filter((step) => done.has(step.id)).length;
 
   return (

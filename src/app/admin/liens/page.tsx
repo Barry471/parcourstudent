@@ -8,7 +8,7 @@ export default function LiensPage() {
     <div className="mx-auto max-w-3xl px-5 py-12">
       <h1 className="font-serif text-4xl">Liens utiles</h1>
       <p className="mt-2 text-muted">
-        Un lien d&apos;affiliation se publie comme les autres, avec la case cochée. Les étudiants les voient sur leur accueil, dans Liens utiles, et en haut de la démarche concernée. Le réseau social reste en bas de chaque page.
+        Un lien d&apos;affiliation se publie comme les autres, avec la case cochée. L&apos;étudiant les voit après avoir indiqué qu&apos;il a le visa : sur son accueil, dans Liens utiles, et en haut de la démarche concernée. Le réseau social reste en bas de chaque page.
       </p>
       <form action={addLinkAction} className="mt-6 grid gap-3 rounded-2xl border border-line bg-card p-4">
         <select name="category" className="rounded-2xl border border-line px-3 py-2">
