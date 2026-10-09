@@ -1,6 +1,7 @@
 import { contactAction } from "@/lib/actions";
 import { currentUser } from "@/lib/auth";
-import { contactEmail } from "@/lib/site";
+import { contactEmail, contactName, contactPhone, contactPhoneText, contactWhatsApp } from "@/lib/site";
+import { accompagnateurName, accompagnateurPhone, accompagnateurPhoneText, accompagnateurWhatsApp } from "@/lib/accompagnement";
 import Link from "next/link";
 
 const errors: Record<string, string> = {
@@ -26,6 +27,17 @@ export default async function ContactPage({
       <p className="mt-3 text-muted">
         Tu écris ici si tu veux qu&apos;on t&apos;appelle pour avancer sur un formulaire. C&apos;est toi qui appuies. S&apos;il y a un prix, il est dit avant le premier appel. Le paiement ne passe pas par ce site. Tu peux aussi écrire à{" "}
         <a className="text-blue underline" href={`mailto:${contactEmail}`}>{contactEmail}</a>.
+      </p>
+      <p className="mt-3 text-sm text-muted">
+        {contactName} :{" "}
+        <a className="text-blue underline" href={`tel:${contactPhone}`}>{contactPhoneText}</a>
+        {" · "}
+        <a className="text-blue underline" href={contactWhatsApp} target="_blank" rel="noreferrer">WhatsApp</a>
+        <br />
+        {accompagnateurName} :{" "}
+        <a className="text-blue underline" href={`tel:${accompagnateurPhone}`}>{accompagnateurPhoneText}</a>
+        {" · "}
+        <a className="text-blue underline" href={accompagnateurWhatsApp} target="_blank" rel="noreferrer">WhatsApp</a>
       </p>
       {sent && <p className="mt-4 text-sm text-blue">C&apos;est envoyé. La réponse arrive sur l&apos;adresse que tu as écrite.</p>}
       {erreur && errors[erreur] && <p className="mt-4 text-sm text-amber">{errors[erreur]}</p>}

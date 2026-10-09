@@ -1,5 +1,5 @@
 import { accompagnateurName } from "@/lib/accompagnement";
-import { contactEmail } from "@/lib/site";
+import { contactEmail, contactName, contactPhone, contactPhoneText } from "@/lib/site";
 
 const kept = [
   "Ton prénom et ton nom, et l'adresse e-mail du compte.",
@@ -61,7 +61,8 @@ export default function ConfidentialitePage() {
           Tu peux demander à voir ton compte, le corriger ou le supprimer.
           {contactEmail ? (
             <>
-              {" "}Écris à <a className="text-blue underline" href={`mailto:${contactEmail}`}>{contactEmail}</a>.
+              {" "}Écris à <a className="text-blue underline" href={`mailto:${contactEmail}`}>{contactEmail}</a>
+              {" "}ou appelle {contactName} au <a className="text-blue underline" href={`tel:${contactPhone}`}>{contactPhoneText}</a>.
             </>
           ) : (
             " L'adresse pour écrire à Thierno BARRY sera affichée ici."

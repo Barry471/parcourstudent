@@ -4,7 +4,7 @@ import { PhoneNav } from "@/components/PhoneNav";
 import { ChatBanner, ChatRow } from "@/components/RouteChrome";
 import { LockIcon } from "@/components/Lock";
 import { accompagnateurName, accompagnateurPhone, accompagnateurPhoneText, accompagnateurWhatsApp } from "@/lib/accompagnement";
-import { contactEmail } from "@/lib/site";
+import { contactEmail, contactName, contactPhone, contactPhoneText, contactWhatsApp } from "@/lib/site";
 import { currentUser } from "@/lib/auth";
 import { candidatures } from "@/lib/candidatures";
 import { linksForCategory } from "@/lib/db";
@@ -121,6 +121,12 @@ export function Footer() {
     <footer className="mt-auto border-t border-line">
       <div className="mx-auto max-w-5xl px-5 py-8 text-sm text-muted">
         <p>Parcourstudent en France explique et oriente. Aucun document n&apos;est déposé ici. Les démarches se font sur les sites officiels.</p>
+        <p className="mt-3">
+          {contactName} :{" "}
+          <a className="text-blue" href={`tel:${contactPhone}`}>Appeler {contactPhoneText}</a>
+          {" · "}
+          <a className="text-blue" href={contactWhatsApp} target="_blank" rel="noreferrer">WhatsApp</a>
+        </p>
         <p className="mt-3">
           Accompagnement personnalisé, {accompagnateurName} :{" "}
           <a className="text-blue" href={`tel:${accompagnateurPhone}`}>Appeler {accompagnateurPhoneText}</a>
