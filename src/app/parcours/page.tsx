@@ -3,7 +3,8 @@ import { cities, undecidedCity, undecidedSchool } from "@/lib/content";
 import { profileAction } from "@/lib/actions";
 import { candidatures } from "@/lib/candidatures";
 import { demarches, percentFor, situations, yearLevels } from "@/lib/demarches";
-import { alertsFor, doneSteps, groupsForCandidature, groupsForCity } from "@/lib/db";
+import { UsefulLinks } from "@/components/UsefulLinks";
+import { alertsFor, allLinks, doneSteps, groupsForCandidature, groupsForCity } from "@/lib/db";
 import { requireUser } from "@/lib/guard";
 import { chapters, phaseOf } from "@/lib/moments";
 import { GroupLinks } from "@/components/GroupLinks";
@@ -26,6 +27,7 @@ export default async function ParcoursPage() {
   const chapter = user.situation ? chapters[user.situation] : undefined;
   const inFrance = phaseOf(user.situation) === "france";
   const alerts = user.role === "user" ? alertsFor(user.country, user.city) : [];
+  const usefulLinks = allLinks();
   const visible = inFrance
     ? demarches.filter((item) => item.forSituations.includes(user.situation ?? ""))
     : demarches.filter((item) => item.id === "budget");
@@ -41,6 +43,16 @@ export default async function ParcoursPage() {
       </p>
 
       {user.role === "user" && <NowCard step={nextFor(user, done)} />}
+
+      {usefulLinks.some((link) => link.category !== "reseau") && (
+        <section className="mt-8 rounded-3xl border border-blue bg-card p-5">
+          <h2 className="font-serif text-2xl">Liens importants</h2>
+          <p className="mt-2 text-sm text-muted">Transport, logement, banque et les autres sites dont tu as besoin. Ouvre la carte.</p>
+          <div className="mt-5">
+            <UsefulLinks links={usefulLinks} />
+          </div>
+        </section>
+      )}
 
       {alerts.length > 0 && (
         <section className="mt-8 rounded-3xl border border-line bg-card p-5">
