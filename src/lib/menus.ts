@@ -32,6 +32,7 @@ export function adminPlus(mail: boolean, full = true): MenuLink[] {
           { href: "/admin/groupes", label: "Groupes" },
           { href: "/admin/liens", label: "Liens" },
           { href: "/admin/videos", label: "Vidéos" },
+          { href: "/admin/envoi", label: "E-mail" },
         ]
       : []),
     ...(mail && full ? [{ href: "/admin/courrier", label: "Courrier" }] : []),

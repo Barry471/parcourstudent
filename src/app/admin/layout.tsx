@@ -14,10 +14,11 @@ const links = [
   { href: "/admin/groupes", label: "Groupes" },
   { href: "/admin/liens", label: "Liens" },
   { href: "/admin/videos", label: "Vidéos" },
+  { href: "/admin/envoi", label: "E-mail" },
   ...(process.env.NODE_ENV === "production" ? [] : [{ href: "/admin/courrier", label: "Courrier" }]),
 ];
 
-const reserved = new Set(["/admin/groupes", "/admin/liens", "/admin/videos", "/admin/courrier"]);
+const reserved = new Set(["/admin/groupes", "/admin/liens", "/admin/videos", "/admin/courrier", "/admin/envoi"]);
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await currentUser();

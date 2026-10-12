@@ -33,7 +33,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   await trackVisit();
   const path = (await headers()).get("x-pathname") ?? "";
   const user = await currentUser();
-  if (user?.role === "accompagnateur" && (path === "/accompagnement" || path.startsWith("/admin/groupes") || path.startsWith("/admin/liens") || path.startsWith("/admin/videos") || path.startsWith("/admin/courrier"))) {
+  if (user?.role === "accompagnateur" && (path === "/accompagnement" || path.startsWith("/admin/groupes") || path.startsWith("/admin/liens") || path.startsWith("/admin/videos") || path.startsWith("/admin/courrier") || path.startsWith("/admin/envoi"))) {
     redirect("/admin");
   }
   const chat = path === "/messages";

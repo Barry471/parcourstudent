@@ -61,7 +61,7 @@ async function zimbraCall(payload: Record<string, unknown>) {
   };
 }
 
-async function deliverViaWebmail(message: { to: string; subject: string; text: string }) {
+async function openWebmail() {
   const user = process.env.SMTP_USER ?? "";
   const pass = process.env.SMTP_PASS ?? "";
   if (!user.includes("@") || !pass) {
@@ -82,13 +82,19 @@ async function deliverViaWebmail(message: { to: string; subject: string; text: s
   if (authFault || !token) {
     throw Object.assign(new Error(authFault || "EAUTH"), { code: authFault || "EAUTH" });
   }
-  const csrf = zimbraText(auth.Body?.AuthResponse?.csrfToken);
+  return { user, token, csrf: zimbraText(auth.Body?.AuthResponse?.csrfToken) };
+}
+
+async function sendWebmail(
+  session: { user: string; token: string; csrf: string },
+  message: { to: string; subject: string; text: string },
+) {
   const sent = await zimbraCall({
     Header: {
       context: {
         _jsns: "urn:zimbra",
-        authToken: token,
-        ...(csrf ? { csrfToken: csrf } : {}),
+        authToken: session.token,
+        ...(session.csrf ? { csrfToken: session.csrf } : {}),
       },
     },
     Body: {
@@ -97,7 +103,7 @@ async function deliverViaWebmail(message: { to: string; subject: string; text: s
         m: {
           e: [
             { t: "t", a: message.to },
-            { t: "f", a: user },
+            { t: "f", a: session.user },
           ],
           su: message.subject,
           mp: { ct: "text/plain", content: message.text },
@@ -109,6 +115,39 @@ async function deliverViaWebmail(message: { to: string; subject: string; text: s
   if (sendFault || !sent.Body?.SendMsgResponse) {
     throw Object.assign(new Error(sendFault || "WEBMAIL_SEND"), { code: sendFault || "WEBMAIL_SEND" });
   }
+}
+
+async function deliverViaWebmail(message: { to: string; subject: string; text: string }) {
+  const session = await openWebmail();
+  await sendWebmail(session, message);
+}
+
+export async function sendAdminMail(messages: { to: string; subject: string; text: string }[]) {
+  if (messages.length === 0) return { sent: 0, failed: 0 };
+  if (localMailEnabled()) {
+    for (const message of messages) saveLocalMail(message);
+    return { sent: messages.length, failed: 0 };
+  }
+  let sent = 0;
+  let failed = 0;
+  let session: { user: string; token: string; csrf: string } | null = null;
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      session = await openWebmail();
+    } catch {
+      session = null;
+    }
+  }
+  for (const message of messages) {
+    try {
+      if (session) await sendWebmail(session, message);
+      else await deliver({ from: mailFrom(), to: message.to, subject: message.subject, text: message.text });
+      sent += 1;
+    } catch {
+      failed += 1;
+    }
+  }
+  return { sent, failed };
 }
 
 async function deliver(message: { from: string; to: string; subject: string; text: string }) {

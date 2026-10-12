@@ -480,6 +480,19 @@ export function trafficSummary() {
   return { total: total.count, today: today.count, users: users.count, recent, accounts };
 }
 
+export function mailRecipients() {
+  const rows = db
+    .prepare("SELECT email, name FROM users WHERE role = 'user' AND active = 1 ORDER BY id")
+    .all() as { email: string; name: string }[];
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    const email = row.email.trim().toLowerCase();
+    if (!email.includes("@") || seen.has(email)) return false;
+    seen.add(email);
+    return true;
+  });
+}
+
 export function studentsByCity() {
   return db
     .prepare(

@@ -45,6 +45,7 @@ import {
   findAccompagnateur,
   findUserByEmail,
   findUserById,
+  mailRecipients,
   saveAccompagnateurAccount,
   recentResetCount,
   saveResetToken,
@@ -61,7 +62,7 @@ import { cleanEmail, cleanText, newPasswordOk, passwordOk, safeNext, validEmail 
 import { removeInfoFile, saveInfoFile, sniffInfo } from "@/lib/infoFiles";
 import { saveMessageMedia } from "@/lib/messageMedia";
 import { broadcastChat } from "@/lib/live";
-import { canSendMail, sendPasswordLink } from "@/lib/mail";
+import { canSendMail, sendAdminMail, sendPasswordLink } from "@/lib/mail";
 import { dummyPasswordHash, hashPassword, verifyPassword } from "@/lib/password";
 
 function studentsPath(formData: FormData) {
@@ -203,6 +204,25 @@ export async function addLinkAction(formData: FormData) {
   }
   addLink(category, title, url, note, affiliate);
   redirect("/admin/liens");
+}
+
+export async function broadcastMailAction(formData: FormData) {
+  await requireAdmin();
+  const subject = cleanText(formData.get("subject"), 120);
+  const text = cleanText(formData.get("text"), 5000);
+  if (formData.get("confirme") !== "1" || subject.length < 3 || text.length < 10) {
+    redirect("/admin/envoi?erreur=1");
+  }
+  const people = mailRecipients();
+  if (people.length === 0) redirect("/admin/envoi?erreur=vide");
+  const result = await sendAdminMail(
+    people.map((person) => ({
+      to: person.email,
+      subject,
+      text: `${text}\n\n—\nParcourstudent en France\nhttps://www.parcourstudent.com\n`,
+    })),
+  );
+  redirect(`/admin/envoi?envoye=${result.sent}&echec=${result.failed}`);
 }
 
 export async function deleteLinkAction(formData: FormData) {
