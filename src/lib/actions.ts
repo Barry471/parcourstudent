@@ -347,23 +347,27 @@ function inGroup(role: string) {
   return role === "user" || role === "admin" || role === "accompagnateur";
 }
 
-function parisDay() {
-  return new Intl.DateTimeFormat("en-CA", {
+function parisWeekStart() {
+  const iso = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Paris",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
+  const date = new Date(`${iso}T12:00:00Z`);
+  const sinceMonday = (date.getUTCDay() + 6) % 7;
+  date.setUTCDate(date.getUTCDate() - sinceMonday);
+  return date.toISOString().slice(0, 10);
 }
 
 function alertChatOnce(authorId: number) {
-  const today = parisDay();
-  const people = chatAlertDue(authorId, today);
+  const week = parisWeekStart();
+  const people = chatAlertDue(authorId, week);
   if (people.length === 0) return;
   void sendChatAlerts(people.map((person) => person.email))
     .then((results) => {
       people.forEach((person, index) => {
-        if (results[index]) markChatAlert(person.id, today);
+        if (results[index]) markChatAlert(person.id, week);
       });
     })
     .catch(() => {});
