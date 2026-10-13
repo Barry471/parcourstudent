@@ -46,6 +46,8 @@ import {
   findUserByEmail,
   findUserById,
   mailRecipients,
+  chatAlertDue,
+  markChatAlert,
   saveAccompagnateurAccount,
   recentResetCount,
   saveResetToken,
@@ -62,7 +64,7 @@ import { cleanEmail, cleanText, newPasswordOk, passwordOk, safeNext, validEmail 
 import { removeInfoFile, saveInfoFile, sniffInfo } from "@/lib/infoFiles";
 import { saveMessageMedia } from "@/lib/messageMedia";
 import { broadcastChat } from "@/lib/live";
-import { canSendMail, sendAdminMail, sendPasswordLink } from "@/lib/mail";
+import { canSendMail, sendAdminMail, sendChatAlerts, sendPasswordLink } from "@/lib/mail";
 import { dummyPasswordHash, hashPassword, verifyPassword } from "@/lib/password";
 
 function studentsPath(formData: FormData) {
@@ -345,6 +347,28 @@ function inGroup(role: string) {
   return role === "user" || role === "admin" || role === "accompagnateur";
 }
 
+function parisDay() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Paris",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+function alertChatOnce(authorId: number) {
+  const today = parisDay();
+  const people = chatAlertDue(authorId, today);
+  if (people.length === 0) return;
+  void sendChatAlerts(people.map((person) => person.email))
+    .then((results) => {
+      people.forEach((person, index) => {
+        if (results[index]) markChatAlert(person.id, today);
+      });
+    })
+    .catch(() => {});
+}
+
 export async function postMessageAction(formData: FormData) {
   const user = await currentUser();
   if (!user || user.active === 0 || !inGroup(user.role)) redirect("/connexion");
@@ -372,6 +396,7 @@ export async function postMessageAction(formData: FormData) {
     }
   }
   broadcastChat();
+  alertChatOnce(user.id);
   redirect("/messages");
 }
 
@@ -396,6 +421,7 @@ export async function commentMessageAction(formData: FormData) {
   if (recentCommentCount(user.id, since) >= 20) redirect("/messages?erreur=attente");
   addComment(id, user.id, body);
   broadcastChat();
+  alertChatOnce(user.id);
   redirect("/messages");
 }
 

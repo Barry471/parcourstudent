@@ -119,6 +119,7 @@ for (const column of ["city", "school", "titre_expires_on", "arrived_on", "remin
   addColumn("users", column, "TEXT");
 }
 addColumn("users", "active", "INTEGER NOT NULL DEFAULT 1");
+addColumn("users", "chat_alert_on", "TEXT");
 addColumn("city_groups", "audience", "TEXT NOT NULL DEFAULT 'ville'");
 db.exec(`
   CREATE TABLE IF NOT EXISTS password_resets (
@@ -569,6 +570,29 @@ export function recentMessageCount(userId: number, sinceIso: string) {
     .prepare("SELECT COUNT(*) AS count FROM messages WHERE user_id = ? AND created_at >= ?")
     .get(userId, sinceIso) as { count: number };
   return row.count;
+}
+
+export function chatAlertDue(exceptUserId: number, today: string) {
+  const rows = db
+    .prepare(
+      `SELECT id, email FROM users
+       WHERE active = 1 AND id != ?
+         AND instr(lower(email), '@') > 0
+         AND (chat_alert_on IS NULL OR chat_alert_on < ?)
+       ORDER BY id`,
+    )
+    .all(exceptUserId, today) as { id: number; email: string }[];
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    const email = row.email.trim().toLowerCase();
+    if (seen.has(email)) return false;
+    seen.add(email);
+    return true;
+  });
+}
+
+export function markChatAlert(userId: number, today: string) {
+  db.prepare("UPDATE users SET chat_alert_on = ? WHERE id = ?").run(today, userId);
 }
 
 export function addMessage(userId: number, body: string, mediaMime = "") {

@@ -123,31 +123,29 @@ async function deliverViaWebmail(message: { to: string; subject: string; text: s
 }
 
 export async function sendAdminMail(messages: { to: string; subject: string; text: string }[]) {
-  if (messages.length === 0) return { sent: 0, failed: 0 };
-  if (localMailEnabled()) {
-    for (const message of messages) saveLocalMail(message);
-    return { sent: messages.length, failed: 0 };
-  }
-  let sent = 0;
-  let failed = 0;
-  let session: { user: string; token: string; csrf: string } | null = null;
-  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-    try {
-      session = await openWebmail();
-    } catch {
-      session = null;
-    }
-  }
-  for (const message of messages) {
-    try {
-      if (session) await sendWebmail(session, message);
-      else await deliver({ from: mailFrom(), to: message.to, subject: message.subject, text: message.text });
-      sent += 1;
-    } catch {
-      failed += 1;
-    }
-  }
-  return { sent, failed };
+  const results = await deliverEach(messages);
+  const sent = results.filter(Boolean).length;
+  return { sent, failed: results.length - sent };
+}
+
+const chatAlertText = `Bonjour,
+
+Il y a un nouveau message dans la messagerie. Ouvre le site, puis Messages.
+
+https://www.parcourstudent.com/messages
+
+—
+Parcourstudent en France
+`;
+
+export async function sendChatAlerts(addresses: string[]) {
+  return deliverEach(
+    addresses.map((to) => ({
+      to,
+      subject: "Nouveau message sur Parcourstudent en France",
+      text: chatAlertText,
+    })),
+  );
 }
 
 async function deliver(message: { from: string; to: string; subject: string; text: string }) {
@@ -183,6 +181,33 @@ async function deliver(message: { from: string; to: string; subject: string; tex
     }
   }
   throw lastError;
+}
+
+async function deliverEach(messages: { to: string; subject: string; text: string }[]) {
+  if (messages.length === 0) return [];
+  if (localMailEnabled()) {
+    for (const message of messages) saveLocalMail(message);
+    return messages.map(() => true);
+  }
+  const results: boolean[] = [];
+  let session: { user: string; token: string; csrf: string } | null = null;
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      session = await openWebmail();
+    } catch {
+      session = null;
+    }
+  }
+  for (const message of messages) {
+    try {
+      if (session) await sendWebmail(session, message);
+      else await deliver({ from: mailFrom(), to: message.to, subject: message.subject, text: message.text });
+      results.push(true);
+    } catch {
+      results.push(false);
+    }
+  }
+  return results;
 }
 
 export async function sendPasswordLink(to: string, name: string, link: string) {
