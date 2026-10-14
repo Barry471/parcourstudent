@@ -4,7 +4,7 @@ import { PhoneNav } from "@/components/PhoneNav";
 import { ChatBanner, ChatRow } from "@/components/RouteChrome";
 import { LockIcon } from "@/components/Lock";
 import { accompagnateurName, accompagnateurPhone, accompagnateurPhoneText, accompagnateurWhatsApp } from "@/lib/accompagnement";
-import { contactEmail, contactName, contactPhone, contactPhoneText, contactWhatsApp } from "@/lib/site";
+import { adjointName, adjointPhone, adjointPhoneText, adjointWhatsApp, contactEmail, contactName, contactPhone, contactPhoneText, contactWhatsApp } from "@/lib/site";
 import { currentUser } from "@/lib/auth";
 import { candidatures } from "@/lib/candidatures";
 import { linksForCategory } from "@/lib/db";
@@ -126,6 +126,12 @@ export function Footer() {
           <a className="text-blue" href={`tel:${contactPhone}`}>Appeler {contactPhoneText}</a>
           {" · "}
           <a className="text-blue" href={contactWhatsApp} target="_blank" rel="noreferrer">WhatsApp</a>
+        </p>
+        <p className="mt-3">
+          Adjoint, {adjointName} :{" "}
+          <a className="text-blue" href={`tel:${adjointPhone}`}>Appeler {adjointPhoneText}</a>
+          {" · "}
+          <a className="text-blue" href={adjointWhatsApp} target="_blank" rel="noreferrer">WhatsApp</a>
         </p>
         <p className="mt-3">
           Accompagnement personnalisé, {accompagnateurName} :{" "}

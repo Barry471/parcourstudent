@@ -1,5 +1,5 @@
 import { accompagnateurName } from "@/lib/accompagnement";
-import { contactEmail, contactName, contactPhone, contactPhoneText } from "@/lib/site";
+import { adjointName, adjointPhone, adjointPhoneText, contactEmail, contactName, contactPhone, contactPhoneText } from "@/lib/site";
 
 const kept = [
   "Ton prénom et ton nom, et l'adresse e-mail du compte.",
@@ -62,7 +62,8 @@ export default function ConfidentialitePage() {
           {contactEmail ? (
             <>
               {" "}Écris à <a className="text-blue underline" href={`mailto:${contactEmail}`}>{contactEmail}</a>
-              {" "}ou appelle {contactName} au <a className="text-blue underline" href={`tel:${contactPhone}`}>{contactPhoneText}</a>.
+              {" "}ou appelle {contactName} au <a className="text-blue underline" href={`tel:${contactPhone}`}>{contactPhoneText}</a>
+              {", ou son adjoint "}{adjointName}{" au "}<a className="text-blue underline" href={`tel:${adjointPhone}`}>{adjointPhoneText}</a>.
             </>
           ) : (
             " L'adresse pour écrire à Thierno BARRY sera affichée ici."

@@ -1,6 +1,6 @@
 import { contactAction } from "@/lib/actions";
 import { currentUser } from "@/lib/auth";
-import { contactEmail, contactName, contactPhone, contactPhoneText, contactWhatsApp } from "@/lib/site";
+import { adjointName, adjointPhone, adjointPhoneText, adjointWhatsApp, contactEmail, contactName, contactPhone, contactPhoneText, contactWhatsApp } from "@/lib/site";
 import { accompagnateurName, accompagnateurPhone, accompagnateurPhoneText, accompagnateurWhatsApp } from "@/lib/accompagnement";
 import Link from "next/link";
 
@@ -33,6 +33,11 @@ export default async function ContactPage({
         <a className="text-blue underline" href={`tel:${contactPhone}`}>{contactPhoneText}</a>
         {" · "}
         <a className="text-blue underline" href={contactWhatsApp} target="_blank" rel="noreferrer">WhatsApp</a>
+        <br />
+        {adjointName}, adjoint :{" "}
+        <a className="text-blue underline" href={`tel:${adjointPhone}`}>{adjointPhoneText}</a>
+        {" · "}
+        <a className="text-blue underline" href={adjointWhatsApp} target="_blank" rel="noreferrer">WhatsApp</a>
         <br />
         {accompagnateurName} :{" "}
         <a className="text-blue underline" href={`tel:${accompagnateurPhone}`}>{accompagnateurPhoneText}</a>
