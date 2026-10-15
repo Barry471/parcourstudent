@@ -1,4 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from "crypto";
+import dgram from "node:dgram";
 import { createServer } from "http";
 import fs from "fs";
 import path from "path";
@@ -30,6 +31,22 @@ function sessionOk(cookieHeader) {
   const left = Buffer.from(signature);
   const right = Buffer.from(expected);
   return left.length === right.length && timingSafeEqual(left, right);
+}
+
+function notifySystemd(message) {
+  const named = process.env.NOTIFY_SOCKET;
+  if (!named) return;
+  const socket = dgram.createSocket("unix_dgram");
+  const destination = named.startsWith("@") ? `\0${named.slice(1)}` : named;
+  socket.on("error", () => socket.close());
+  socket.send(Buffer.from(message), destination, () => socket.close());
+}
+
+function watchSystemd() {
+  const usec = Number(process.env.WATCHDOG_USEC);
+  if (!usec) return;
+  const timer = setInterval(() => notifySystemd("WATCHDOG=1\n"), Math.floor(usec / 2000));
+  timer.unref();
 }
 
 await app.prepare();
@@ -127,5 +144,7 @@ server.on("upgrade", (req, socket) => {
 });
 
 server.listen(port, hostname, () => {
+  notifySystemd("READY=1\n");
+  watchSystemd();
   console.log(`> Parcourstudent sur http://localhost:${port}`);
 });
