@@ -1,5 +1,5 @@
+import { spawnSync } from "node:child_process";
 import { createHash, createHmac, timingSafeEqual } from "crypto";
-import dgram from "node:dgram";
 import { createServer } from "http";
 import fs from "fs";
 import path from "path";
@@ -34,12 +34,13 @@ function sessionOk(cookieHeader) {
 }
 
 function notifySystemd(message) {
-  const named = process.env.NOTIFY_SOCKET;
-  if (!named) return;
-  const socket = dgram.createSocket("unix_dgram");
-  const destination = named.startsWith("@") ? `\0${named.slice(1)}` : named;
-  socket.on("error", () => socket.close());
-  socket.send(Buffer.from(message), destination, () => socket.close());
+  if (!process.env.NOTIFY_SOCKET) return;
+  const args = message.split("\n").map((line) => line.trim()).filter(Boolean);
+  try {
+    spawnSync("/usr/bin/systemd-notify", args, { stdio: "ignore", timeout: 1000 });
+  } catch {
+    // Le site continue même si le signal de vie ne part pas.
+  }
 }
 
 function watchSystemd() {
